@@ -171,8 +171,8 @@ void loadClockTicksRc(struct ClockTicks &ct) {
 
 int main(int argc, char* argv[]) {
 	if (argc != 3) {
-		printf("Missing parameters\n");
-		return 0;
+		printf("Syntax: %s {s,r,fulldebug,} <file.obj>\n", argv[0]);
+		return EXIT_FAILURE;
 	}
     ClockTicks ct = clockticks_new();
     loadClockTicksRc(ct);
@@ -241,5 +241,5 @@ int main(int argc, char* argv[]) {
 
 	screen.join();
 	printf("\n");
-	return 0;
+	return EXIT_SUCCESS;
 }
