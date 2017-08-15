@@ -13,8 +13,7 @@ Memory encoding is as follows rrrrrrgggggbbbbb. The last 5 bits are for the blue
 We use the instruction `refresh` to tell the simulator that the screen can be refreshed. 
 
 ### Functions inside the library
-I give here a listing of functions implemented inside vfx.s. A proper documentation for each one is put inside vfx.s
-[TODO, do a better documentation]
+I give here a listing of functions implemented inside vfx.s. 
 - putstr: put a string on a screen. A string is null-terminated, like in C
     - r0: color
     - r1: x coordinate
