@@ -21,7 +21,7 @@ The commands available are:
 - d: print all the registers and the PC
 
 
-##config.rc:
+## config.rc:
 This file can be use to input the cycles used by each instructions. The syntax of the file is as follow
 ```
 instruction_name cycles

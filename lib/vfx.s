@@ -1,6 +1,6 @@
 .align16
 putstr:
-	;put a string on the screen at coordinates (r1, r2) with the color r3
+	;put a string on the screen at coordinates (r1, r2) with the color r0
 	;if r4 is not 1 then refresh between each letter
 	copy r6 r3
 	__putstr_loop:
@@ -246,4 +246,4 @@ fill:
 
 
 
-#include fonts_data.s
+#include fonts.s
