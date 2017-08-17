@@ -410,7 +410,7 @@ class Copy(_Instruction):
 
 class Refresh(_Instruction):
     """
-    refresh isntruction
+    refresh instruction
     ask the screen refresh and wait for the end of the frame
     """
     def __init__(self, *args):
