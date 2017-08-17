@@ -171,12 +171,13 @@ void loadClockTicksRc(struct ClockTicks &ct) {
 
 int main(int argc, char* argv[]) {
 	if (argc != 3) {
-		printf("Syntax: %s {s,r,fulldebug,} <file.obj>\n", argv[0]);
+		printf("Syntax: %s {-s,-r,-fulldebug,-q} <file.obj>\n", argv[0]);
 		return EXIT_FAILURE;
 	}
     ClockTicks ct = clockticks_new();
     loadClockTicksRc(ct);
 	Param param;
+	bool quiet = false;
 	/* parse the params */
 	if (std::string(argv[1]) == "-s") {
 		param.step_by_step = true;
@@ -190,6 +191,13 @@ int main(int argc, char* argv[]) {
 		param.fast_mode = false;
 		param.full_debug = false;
 		param.skip_call = true;
+	} else if (std::string(argv[1]) == "-q") {
+		param.step_by_step = false;
+		param.debug_output = false;
+		param.fast_mode = true;
+		param.full_debug = false;
+		param.skip_call = false;
+		quiet = true;
 	} else if (std::string(argv[1]) == "-r") {
 		param.step_by_step = false;
 		param.debug_output = true;
@@ -221,7 +229,10 @@ int main(int argc, char* argv[]) {
     machine.clock_ticks = ct;
 	machine.in_call = false;
 	/* launch the screen with the option to manually refresh the screen deactivated*/
-	std::thread screen(simulate_screen, std::ref(machine), std::ref(force_quit), std::ref(refresh), true);
+	std::thread screen;
+	if (!quiet) {
+		screen = std::thread(simulate_screen, std::ref(machine), std::ref(force_quit), std::ref(refresh), true);
+	}
 	/* if we can read the program */
 	if (readFromStr(argv[2], machine)) {
 		loadCodeToMemory(machine);
@@ -231,15 +242,19 @@ int main(int argc, char* argv[]) {
 		} else {
 			fullDebug(machine, param);
 		}
-		printf("Simulation fini en %dmilli seconds\n", SDL_GetTicks() - time_exec);
-		printf("Veuillez appuyer sur une touche ");
-		getchar();
-		force_quit = true;
-		printf("\n");
+		if (!quiet) {
+			printf("Simulation fini en %dmilli seconds\n", SDL_GetTicks() - time_exec);
+			printf("Veuillez appuyer sur une touche ");
+			getchar();
+			force_quit = true;
+			printf("\n");
+		}
 	}
 
 
-	screen.join();
-	printf("\n");
+	if (!quiet) {
+		screen.join();
+		printf("\n");
+	}
 	return EXIT_SUCCESS;
 }
