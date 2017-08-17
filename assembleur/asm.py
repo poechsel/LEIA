@@ -197,7 +197,6 @@ class CustomReserve(_Instruction):
 
 
 #code of the print function we added for debugging purpose
-"""
 class Print(_Instruction):
     def __init__(self, *args):
         super(Print, self).__init__(*args)
@@ -213,7 +212,6 @@ class Print(_Instruction):
             for c in self.words[1][1:-1]:
                 o += [self.addThing(0b1110, 12) + self.addThing(2, 10) + self.addThing(ord(c), 0)]
             return o + [self.addThing(0b1110, 12) + self.addThing(2, 10) + self.addThing(ord('\n'), 0)]
-"""
 
 
 class CustomString(_Instruction):
