@@ -180,15 +180,14 @@ void simulate(Machine &machine, Param &param) {
 	machine.pc = 0;
 	uword previous_pc = -1;
 	while (machine.pc != previous_pc) {
-		previous_pc = machine.pc;
-		do {
-            evaluate(machine.memory[machine.pc], machine, param);
-        } while (param.skip_call && machine.in_call);
-        //evaluate(machine.memory[machine.pc], machine, param);
 		if (param.debug_output)
 			debug(machine);
 		if (param.step_by_step)
 			getchar();
+		previous_pc = machine.pc;
+		do {
+			evaluate(machine.memory[machine.pc], machine, param);
+		} while (param.skip_call && machine.in_call);
 	}
 }
 
