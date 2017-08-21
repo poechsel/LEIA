@@ -114,8 +114,8 @@ void tolowercase(std::string &data) {
     std::transform(data.begin(), data.end(), data.begin(), ::tolower);
 }
 
-void loadClockTicksRc(struct ClockTicks &ct) {
-    std::ifstream file("config.rc");
+void loadClockTicksRc(const std::string &dir, struct ClockTicks &ct) {
+    std::ifstream file(dir + std::string("/config.rc"));
     if (!file.is_open() || file.fail()) {
         std::cout << "Exception reading config.rc\n";
         return; 
@@ -162,10 +162,10 @@ void loadClockTicksRc(struct ClockTicks &ct) {
             ct.click_constant = value;
 
         }
-        std::cout<<keyword<<": "<<value<<"\n";
+        // std::cout<<keyword<<": "<<value<<"\n";
     
     }
-    std::cout<<"file opened";
+    // std::cout<<"file opened";
     file.close();
 }
 
@@ -175,7 +175,10 @@ int main(int argc, char* argv[]) {
 		return EXIT_FAILURE;
 	}
     ClockTicks ct = clockticks_new();
-    loadClockTicksRc(ct);
+    using namespace std;
+    string dir = argv[0];
+    dir.resize(dir.rfind('/')); // dirname of argv[0], i.e. LEIA directory.
+    loadClockTicksRc(dir, ct);
 	Param param;
 	bool quiet = false;
 	/* parse the params */
