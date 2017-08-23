@@ -8,7 +8,7 @@ void debugRegister(const Machine& machine, const int reg) {
 void debug(const Machine &machine) {
 	if (machine.in_call)
 		return;
-	printf("Operation = %x : \n", machine.memory[machine.pc]);
+	printf("Next operation = %x : \n", machine.memory[machine.pc]);
 	for (int i = 0; i < 16; i++) {
 		debugRegister(machine, i);
 	}

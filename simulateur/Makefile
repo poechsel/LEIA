@@ -1,5 +1,5 @@
 CFLAGS = -Wall -O2 -std=c++11
-LDFLAGS = -lSDL2 -lpthread
+LDFLAGS = -lSDL2 -lpthread -lstdc++
 EXEC = LEIA
 SRC = $(wildcard *.cpp)
 OBJS = $(SRC:.cpp=.o)

@@ -114,8 +114,8 @@ void tolowercase(std::string &data) {
     std::transform(data.begin(), data.end(), data.begin(), ::tolower);
 }
 
-void loadClockTicksRc(struct ClockTicks &ct) {
-    std::ifstream file("config.rc");
+void loadClockTicksRc(const std::string &dir, struct ClockTicks &ct) {
+    std::ifstream file(dir + std::string("/config.rc"));
     if (!file.is_open() || file.fail()) {
         std::cout << "Exception reading config.rc\n";
         return; 
@@ -162,21 +162,25 @@ void loadClockTicksRc(struct ClockTicks &ct) {
             ct.click_constant = value;
 
         }
-        std::cout<<keyword<<": "<<value<<"\n";
+        // std::cout<<keyword<<": "<<value<<"\n";
     
     }
-    std::cout<<"file opened";
+    // std::cout<<"file opened";
     file.close();
 }
 
 int main(int argc, char* argv[]) {
 	if (argc != 3) {
-		printf("Missing parameters\n");
-		return 0;
+		printf("Syntax: %s {-s,-r,-fulldebug,-q} <file.obj>\n", argv[0]);
+		return EXIT_FAILURE;
 	}
     ClockTicks ct = clockticks_new();
-    loadClockTicksRc(ct);
+    using namespace std;
+    string dir = argv[0];
+    dir.resize(dir.rfind('/')); // dirname of argv[0], i.e. LEIA directory.
+    loadClockTicksRc(dir, ct);
 	Param param;
+	bool quiet = false;
 	/* parse the params */
 	if (std::string(argv[1]) == "-s") {
 		param.step_by_step = true;
@@ -190,6 +194,13 @@ int main(int argc, char* argv[]) {
 		param.fast_mode = false;
 		param.full_debug = false;
 		param.skip_call = true;
+	} else if (std::string(argv[1]) == "-q") {
+		param.step_by_step = false;
+		param.debug_output = false;
+		param.fast_mode = true;
+		param.full_debug = false;
+		param.skip_call = false;
+		quiet = true;
 	} else if (std::string(argv[1]) == "-r") {
 		param.step_by_step = false;
 		param.debug_output = true;
@@ -221,7 +232,10 @@ int main(int argc, char* argv[]) {
     machine.clock_ticks = ct;
 	machine.in_call = false;
 	/* launch the screen with the option to manually refresh the screen deactivated*/
-	std::thread screen(simulate_screen, std::ref(machine), std::ref(force_quit), std::ref(refresh), true);
+	std::thread screen;
+	if (!quiet) {
+		screen = std::thread(simulate_screen, std::ref(machine), std::ref(force_quit), std::ref(refresh), true);
+	}
 	/* if we can read the program */
 	if (readFromStr(argv[2], machine)) {
 		loadCodeToMemory(machine);
@@ -231,15 +245,19 @@ int main(int argc, char* argv[]) {
 		} else {
 			fullDebug(machine, param);
 		}
-		printf("Simulation fini en %dmilli seconds\n", SDL_GetTicks() - time_exec);
-		printf("Veuillez appuyer sur une touche ");
-		getchar();
-		force_quit = true;
-		printf("\n");
+		if (!quiet) {
+			printf("Simulation fini en %dmilli seconds\n", SDL_GetTicks() - time_exec);
+			printf("Veuillez appuyer sur une touche ");
+			getchar();
+			force_quit = true;
+			printf("\n");
+		}
 	}
 
 
-	screen.join();
-	printf("\n");
-	return 0;
+	if (!quiet) {
+		screen.join();
+		printf("\n");
+	}
+	return EXIT_SUCCESS;
 }

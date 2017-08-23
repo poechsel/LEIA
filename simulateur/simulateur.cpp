@@ -139,26 +139,19 @@ void evaluate(const uword opcode, Machine &machine, Param &param) {
 			machine.pc++;
             speed_factor = machine.clock_ticks.leth_t;
 			break;}
-		case 0b1110:
-			refresh = true;
-			while (refresh) {};
+		case 0b1110: // extensions : refresh and print
+			switch ((opcode >> 10) & 0b11) {
+			case 1:
+				printf("%d\n", (word)machine.registers[toUWord(opcode)]);	
+				break;
+			case 2:
+				printf("%c", opcode & 0xff);
+				break;
+			default:
+				refresh = true;
+				while (refresh) {};
+			};
 			machine.pc++;
-			/* Remains of a time where we added the print instruction
-			 switch ((opcode >> 10) & 0b11) {
-				case 1: {
-					printf("r%d = %d\n", toUWord(opcode), (word)machine.registers[toUWord(opcode)]);	
-					machine.pc++;
-					break;
-				} case 2: {
-					printf("%c", opcode & 0xff);
-					machine.pc++;
-					break;
-				}default: {
-					refresh = true;
-					while (refresh) {};
-					machine.pc++;
-					}
-			} */
 			break;
 		case 0b1111: //rmem
 			machine.pc++;
@@ -187,15 +180,14 @@ void simulate(Machine &machine, Param &param) {
 	machine.pc = 0;
 	uword previous_pc = -1;
 	while (machine.pc != previous_pc) {
-		previous_pc = machine.pc;
-		do {
-            evaluate(machine.memory[machine.pc], machine, param);
-        } while (param.skip_call && machine.in_call);
-        //evaluate(machine.memory[machine.pc], machine, param);
 		if (param.debug_output)
 			debug(machine);
 		if (param.step_by_step)
 			getchar();
+		previous_pc = machine.pc;
+		do {
+			evaluate(machine.memory[machine.pc], machine, param);
+		} while (param.skip_call && machine.in_call);
 	}
 }
 

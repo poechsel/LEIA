@@ -19,16 +19,16 @@ Authors : Pierre Oechsel and Guillaume Duboc, ENSL.
 
 ## ASSEMBLY
 - python3 asm.py /path/to/example.s produces /path/to/example.obj
-- then ./simu [f or s] /path/to/example.obj
+- then ./LEIA {-f,-s,-q} /path/to/example.obj
 
 ## TEST DISTRIB
 cd EX 
 
 #### simple simulation step by step:
-python3 ../asm.py tp1-simple.s && ../simu -s tp1-simple.obj
+python3 ../asm.py tp1-simple.s && ../LEIA -s tp1-simple.obj
 
 #### fast simu, graphical example
-python3 ../asm.py hello.s && ../simu -f hello.obj 
+python3 ../asm.py hello.s && ../LEIA -f hello.obj 
 
 
 ## ISA:

@@ -1,0 +1,13 @@
+#! /bin/sh
+
+HERE=$(cd "$(dirname "$0")" && pwd)
+
+if [ $# -ne 1 ]; then
+    echo "usage: $(basename "$0") file.s"
+    exit 1
+fi
+
+asm=$1
+
+python3 "$HERE"/asm.py "$asm"
+simu -q "${asm%.s}.obj"

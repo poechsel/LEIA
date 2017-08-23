@@ -12,7 +12,7 @@ void simulate_screen(const Machine& machine, bool &force_quit, volatile bool &re
 	SDL_RenderSetScale(renderer, 2, 2);
 	bool escape = false;
 	/*temp buffer*/
-	uint32_t tempscreen[0xffff - MEM_SCREEN_BEGIN];
+	uint32_t tempscreen[0xffff - MEM_SCREEN_BEGIN + 1];
 
 	while (!escape) {
 		/*deal with events*/
