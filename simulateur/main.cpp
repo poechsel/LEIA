@@ -45,6 +45,7 @@ uword convHex(char c) {
 std::vector<uword> toOpCodes(std::string source) {
 	if (source.size() % 4 != 0) {
 		printf ("Oups, code incorrect\n");
+		exit(1);
 		return std::vector<uword>();
 	}
 	std::vector<uword> out;
@@ -89,6 +90,11 @@ bool readFromBin(std::string file_path, Machine &machine) {
 /* load the program from a path */
 bool readFromStr(std::string file_path, Machine &machine) {
 	std::ifstream file(file_path);
+    if(file.fail()) {
+        std::cout << "cannot read file: '" << file_path << "'\n";
+        exit(1);
+        //Note: returning false does not seem enough so we exit() ourselves
+    }
 	std::string code_str = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 	machine.program = toOpCodes(stripNonHex(code_str));
 	return true;
