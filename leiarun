@@ -9,5 +9,7 @@ fi
 
 asm=$1
 
-python3 "$HERE"/asm.py "$asm"
-simu -q "${asm%.s}.obj"
+rm -f "${asm%.s}.obj" &&
+    python3 "$HERE"/assembleur/asm.py "$asm" &&
+    test -f "${asm%.s}.obj" &&
+    "$HERE"/simulateur/LEIA -q "${asm%.s}.obj"
