@@ -252,8 +252,8 @@ int main(int argc, char* argv[]) {
 			fullDebug(machine, param);
 		}
 		if (!quiet) {
-			printf("Simulation fini en %dmilli seconds\n", SDL_GetTicks() - time_exec);
-			printf("Veuillez appuyer sur une touche ");
+			printf("Simulation finished in %d ms\n", SDL_GetTicks() - time_exec);
+			printf("Please press the ENTER key");
 			getchar();
 			force_quit = true;
 			printf("\n");
