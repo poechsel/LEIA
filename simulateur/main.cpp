@@ -181,11 +181,13 @@ int main(int argc, char* argv[]) {
 		return EXIT_FAILURE;
 	}
     ClockTicks ct = clockticks_new();
-    using namespace std;
-    string dir = argv[0];
-    dir.resize(dir.rfind('/')); // dirname of argv[0], i.e. LEIA directory.
-    loadClockTicksRc(dir, ct);
-	Param param;
+    {
+        using namespace std;
+        string dir = argv[0];
+        dir.resize(dir.rfind('/')); // dirname of argv[0], i.e. LEIA directory.
+        loadClockTicksRc(dir, ct);
+    }
+    Param param;
 	bool quiet = false;
 	/* parse the params */
 	if (std::string(argv[1]) == "-s") {
