@@ -45,6 +45,7 @@ uword convHex(char c) {
 std::vector<uword> toOpCodes(std::string source) {
 	if (source.size() % 4 != 0) {
 		printf ("Oups, code incorrect\n");
+		exit(1);
 		return std::vector<uword>();
 	}
 	std::vector<uword> out;
@@ -89,6 +90,11 @@ bool readFromBin(std::string file_path, Machine &machine) {
 /* load the program from a path */
 bool readFromStr(std::string file_path, Machine &machine) {
 	std::ifstream file(file_path);
+    if(file.fail()) {
+        std::cout << "cannot read file: '" << file_path << "'\n";
+        exit(1);
+        //Note: returning false does not seem enough so we exit() ourselves
+    }
 	std::string code_str = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 	machine.program = toOpCodes(stripNonHex(code_str));
 	return true;
@@ -175,11 +181,13 @@ int main(int argc, char* argv[]) {
 		return EXIT_FAILURE;
 	}
     ClockTicks ct = clockticks_new();
-    using namespace std;
-    string dir = argv[0];
-    dir.resize(dir.rfind('/')); // dirname of argv[0], i.e. LEIA directory.
-    loadClockTicksRc(dir, ct);
-	Param param;
+    {
+        using namespace std;
+        string dir = argv[0];
+        dir.resize(dir.rfind('/')); // dirname of argv[0], i.e. LEIA directory.
+        loadClockTicksRc(dir, ct);
+    }
+    Param param;
 	bool quiet = false;
 	/* parse the params */
 	if (std::string(argv[1]) == "-s") {
@@ -246,8 +254,8 @@ int main(int argc, char* argv[]) {
 			fullDebug(machine, param);
 		}
 		if (!quiet) {
-			printf("Simulation fini en %dmilli seconds\n", SDL_GetTicks() - time_exec);
-			printf("Veuillez appuyer sur une touche ");
+			printf("Simulation finished in %d ms\n", SDL_GetTicks() - time_exec);
+			printf("Please press the ENTER key");
 			getchar();
 			force_quit = true;
 			printf("\n");
