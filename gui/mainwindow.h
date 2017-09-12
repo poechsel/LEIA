@@ -7,7 +7,9 @@
 #include <QListWidget>
 #include <QStringListModel>
 #include <QFileDialog>
-#include "codemodel.h"
+#include "codeview.h"
+#include "../simulateur/utilities.h"
+#include "../simulateur/debug.h"
 
 namespace Ui {
 class MainWindow;
@@ -24,6 +26,7 @@ public:
 private:
     QStringList _code;
     QListWidget *_list_view;
+    CodeView *_code_view;
 
 private slots:
    void open_file();

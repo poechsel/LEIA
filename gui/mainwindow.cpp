@@ -21,28 +21,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QLineEdit *age = new QLineEdit;
 
- CodeModel *a = new CodeModel;
 
 
     QHBoxLayout *layout = new QHBoxLayout;
 
-    QStringList list;
-    list << "a" << "b" << "c";
-
 //    http://www.walletfox.com/course/qtcheckablelist.php
-    _list_view = new QListWidget;
-    _list_view->addItems(list);
-
-     QListWidgetItem* item = 0;
-    for(int i = 0; i < _list_view->count(); ++i){
-        item = _list_view->item(i);
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(Qt::Unchecked);
-    }
-
     layout->addWidget(nom);
 
-    layout->addWidget(_list_view);
+    _code_view = new CodeView;
+    layout->addWidget(_code_view);
 
     layout->addWidget(age);
 
@@ -60,22 +47,11 @@ void MainWindow::open_file() {
         return;
 
     _code.clear();
-    while (!file.atEnd()) {
-        QByteArray line = file.readLine();
-        line.trimmed();
-        _code.append(line);
-    }
+    Machine machine;
+    readFromStr(file_name.toStdString(), machine);
+    loadCodeToMemory(machine);
 
-    _list_view->clear();
-    _list_view->addItems(_code);
-     QListWidgetItem* item = 0;
-    for(int i = 0; i < _list_view->count(); ++i){
-        item = _list_view->item(i);
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(Qt::Unchecked);
-
-    item->setTextAlignment(Qt::AlignVCenter);
-    }
+    _code_view->update(machine);
 }
 
 MainWindow::~MainWindow()

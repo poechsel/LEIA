@@ -26,11 +26,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    codemodel.cpp
+    ../simulateur/utilities.cpp \
+    ../simulateur/structs.cpp \
+    ../simulateur/debug.cpp \
+    codeview.cpp \
+    memoryview.cpp
+
 
 HEADERS += \
         mainwindow.h \
-    codemodel.h
+    ../simulateur/structs.h \
+    ../simulateur/utilities.h \
+    ../simulateur/debug.h \
+    codeview.h \
+    memoryview.h
 
 FORMS += \
         mainwindow.ui
