@@ -9,7 +9,9 @@ all : $(EXEC)
 $(EXEC) : $(OBJS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
-main.o: main.cpp debug.h screen.h simulateur.h structs.h
+main.o: main.cpp debug.h screen.h simulateur.h structs.h utilities.h
+	$(CXX) $(CFLAGS) -o $@ -c $<
+utilities.o : utilities.cpp structs.h utilities.h
 	$(CXX) $(CFLAGS) -o $@ -c $<
 debug.o: debug.cpp structs.h debug.h
 	$(CXX) $(CFLAGS) -o $@ -c $<
