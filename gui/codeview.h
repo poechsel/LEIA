@@ -12,10 +12,15 @@ class CodeView: public QListWidget
     Q_OBJECT
 public:
     CodeView(QWidget *parent = 0);
-    void update(Machine &machine);
+    void setMachine(Machine &machine);
+    void update();
 
 protected:
     void refresh();
+    Machine *_machine;
+
+public slots:
+    void updateCode(int row);
 };
 
 #endif // CODEVIEW_H

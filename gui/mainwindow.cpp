@@ -25,8 +25,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QHBoxLayout *layout = new QHBoxLayout;
 
+    _memory_view = new MemoryView;
 //    http://www.walletfox.com/course/qtcheckablelist.php
-    layout->addWidget(nom);
+    layout->addWidget(_memory_view);
 
     _code_view = new CodeView;
     layout->addWidget(_code_view);
@@ -36,11 +37,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     zoneCentrale->setLayout(layout);
     setCentralWidget(zoneCentrale);
+
+    connect(_memory_view, SIGNAL(cellChanged(int,int)), _memory_view, SLOT(editCell(int,int)));
+    connect(_memory_view, SIGNAL(memoryChanged(int)), _code_view, SLOT(updateCode(int)));
 }
 
 void MainWindow::open_file() {
+    disconnect(_memory_view, SIGNAL(cellChanged(int,int)), _memory_view, SLOT(editCell(int,int)));
     QString file_name = QFileDialog::getOpenFileName(this,
-    tr("Open code"), "/home/", "");
+    tr("Open code"), "/home/pierre/Demo-ASR/demo/", "");
 
     QFile file(file_name);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -51,7 +56,11 @@ void MainWindow::open_file() {
     readFromStr(file_name.toStdString(), machine);
     loadCodeToMemory(machine);
 
-    _code_view->update(machine);
+    _code_view->setMachine(machine);
+    _memory_view->setMachine(machine);
+    _code_view->update();
+    _memory_view->update();
+    connect(_memory_view, SIGNAL(cellChanged(int,int)), _memory_view, SLOT(editCell(int,int)));
 }
 
 MainWindow::~MainWindow()

@@ -1,20 +1,31 @@
 #include "codeview.h"
 
 CodeView::CodeView(QWidget *parent):
-    QListWidget(parent)
+    QListWidget(parent), _machine(0)
 {
     this->setUniformItemSizes(true);
 }
 
 
-void CodeView::update(Machine &machine) {
+void CodeView::update() {
     QStringList code;
     for (int i = 0; i < 0x10000; ++i) {
-        code.append(QString::fromStdString(dissassemble(machine.memory[i])));
+        code.append(QString::fromStdString(dissassemble(_machine->memory[i])));
     }
     this->clear();
     this->addItems(code);
     this->refresh();
+}
+
+void CodeView::updateCode(int row) {
+    if (!_machine) return;
+    QString foo = QString::fromStdString(dissassemble(_machine->memory[row]));
+    if (row < this->count())
+        this->item(row)->setText(foo);
+}
+
+void CodeView::setMachine(Machine &machine) {
+    this->_machine = &machine;
 }
 
 void CodeView::refresh() {

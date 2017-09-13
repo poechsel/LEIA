@@ -10,6 +10,7 @@
 #include "codeview.h"
 #include "../simulateur/utilities.h"
 #include "../simulateur/debug.h"
+#include "memoryview.h"
 
 namespace Ui {
 class MainWindow;
@@ -27,6 +28,7 @@ private:
     QStringList _code;
     QListWidget *_list_view;
     CodeView *_code_view;
+    MemoryView *_memory_view;
 
 private slots:
    void open_file();
