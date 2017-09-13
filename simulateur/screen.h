@@ -19,7 +19,14 @@ class SDLScreen : public Screen {
         ~SDLScreen();
         virtual void update(uword *memory);
     private:
-        void action(SDLScreen *screen);
+        void action();
+        void create();
+        void close();
+
+        SDL_Window *_window;
+        SDL_Renderer *_renderer;
+        SDL_Texture *_texture;
+
         volatile bool _refresh;
         bool _force_quit;
         uword *_memory;
