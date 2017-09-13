@@ -1,8 +1,24 @@
 #include "screen.h"
 
+SDLScreen::SDLScreen():
+    _refresh(false),
+_force_quit(false)
+{
+    _thread = std::thread(&SDLScreen::action, this, this);
+}
 
-void simulate_screen(const Machine& machine, bool &force_quit, volatile bool &refr, bool activate_refresh_command) {
-	/*initialise sdl and create the screen*/
+SDLScreen::~SDLScreen() {
+    this->_force_quit = true;
+    _thread.join();
+}
+
+void SDLScreen::update(uword *memory) {
+    _memory = memory;
+    _refresh = true;
+    while (_refresh) {};
+}
+    
+void SDLScreen::action(SDLScreen *screen) {
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_Window *window = SDL_CreateWindow("Asm", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH*2, HEIGHT*2, 0);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
@@ -11,11 +27,9 @@ void simulate_screen(const Machine& machine, bool &force_quit, volatile bool &re
 	Uint32 last_time = SDL_GetTicks();
 	SDL_RenderSetScale(renderer, 2, 2);
 	bool escape = false;
-	/*temp buffer*/
 	uint32_t tempscreen[0xffff - MEM_SCREEN_BEGIN + 1];
 
 	while (!escape) {
-		/*deal with events*/
 		while (SDL_PollEvent(&e) != 0) {
 			if (e.type == SDL_QUIT) {
 				escape = true;
@@ -24,38 +38,32 @@ void simulate_screen(const Machine& machine, bool &force_quit, volatile bool &re
 					escape = true;
 			}
 		}
-		if (force_quit)
-			escape = force_quit;
-		/* if we need to refresh the screen*/
-		if (refr || !activate_refresh_command) {
-			/* convert the colors */
+		if (_force_quit)
+			escape = screen->_force_quit;
+		if (screen->_refresh) {
 			for (unsigned int i = MEM_SCREEN_BEGIN; i <= 0xFFFF; ++i) {
-				word pixel = machine.memory[i];
+				word pixel = (screen->_memory) ? screen->_memory[i] : 0;
 				uint32_t blue = pixel & ((1<<5)-1); 
 				uint32_t green = (pixel>>5) & ((1<<5)-1); 
 				uint32_t red = (pixel>>10) ;
 				tempscreen[i - MEM_SCREEN_BEGIN] = (red << (2+16)) + (green << (3+8)) + (blue << 3);
 			}
-			/* update the screen */
 			SDL_UpdateTexture(texture, NULL, tempscreen, WIDTH * sizeof(uint32_t));
 			SDL_RenderClear(renderer);
 			SDL_RenderCopy(renderer, texture, NULL, NULL);
 			SDL_RenderPresent(renderer);
-			/* wait */
 			Uint32 current = SDL_GetTicks();
 			if (current - last_time < (1000.f * 1.f/60.f)) {
 				SDL_Delay((1000.f * 1.f / 60.f) - last_time + current);
 			}
-			refr = false;
+			screen->_refresh = false;
 			last_time = current;
 		}
 	}
-	/* close the screen properly */
-	refr = false;
+	screen->_refresh = false;
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
-
 

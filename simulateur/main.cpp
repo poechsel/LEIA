@@ -20,7 +20,6 @@
 
 
 bool force_quit = false;
-extern volatile bool refresh;
 /* function to handle any forced exit */
 void handleForceExit(int sig) {
 	force_quit = true;
@@ -149,18 +148,19 @@ int main(int argc, char* argv[]) {
     machine.clock_ticks = ct;
 	machine.in_call = false;
 	/* launch the screen with the option to manually refresh the screen deactivated*/
-	std::thread screen;
+
+    Screen *screen_ = 0;
 	if (!quiet) {
-		screen = std::thread(simulate_screen, std::ref(machine), std::ref(force_quit), std::ref(refresh), true);
+    screen_ = new SDLScreen;
 	}
 	/* if we can read the program */
 	if (readFromStr(argv[2], machine)) {
 		loadCodeToMemory(machine);
 		Uint32 time_exec = SDL_GetTicks();
 		if (!param.full_debug) {
-            simulate(machine, param);
+            simulate(machine, param, screen_);
 		} else {
-			fullDebug(machine, param);
+			fullDebug(machine, param, screen_);
 		}
 		if (!quiet) {
 			printf("Simulation fini en %dmilli seconds\n", SDL_GetTicks() - time_exec);
@@ -171,9 +171,8 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-
 	if (!quiet) {
-		screen.join();
+        delete screen_;
 		printf("\n");
 	}
 	return EXIT_SUCCESS;
