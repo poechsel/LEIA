@@ -153,7 +153,7 @@ void evaluate(const uword opcode, Machine &machine, Param &param, Screen* screen
 				while (refresh) {};
 			    */
                 if (screen)
-                    screen->update(machine.memory);
+                    screen->updateContent(machine.memory);
                 };
 			machine.pc++;
 			break;

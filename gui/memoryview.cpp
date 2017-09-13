@@ -27,9 +27,6 @@ void MemoryView::setMachine(Machine &machine) {
 }
 
 void MemoryView::_updateRow(int row, int value) {
-    qDebug()<<"--> "<<value<<" "<<this<<" "<<row<<"\n";
-    auto *t = new QTableWidgetItem(QString::number(value));
-    qDebug()<<t<<"\n";
     if (row < this->rowCount()) {
         this->item(row, 0)->setText(QString::number(value));
         this->item(row, 1)->setText("0x" + QString::number(value, 16).rightJustified(4, '0'));

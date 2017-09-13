@@ -23,7 +23,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 INCLUDEPATH += /usr/bin/include/
-LIBS += /usr/local/lib/ -lSDL2 -lpthread
+LIBS +=  -lSDL2 -lpthread
 
 SOURCES += \
         main.cpp \
@@ -33,7 +33,9 @@ SOURCES += \
     ../simulateur/debug.cpp \
     codeview.cpp \
     memoryview.cpp \
-    sdlwidget.cpp
+    sdlwidget.cpp \
+    ../simulateur/screen.cpp \
+    ../simulateur/simulateur.cpp
 
 
 HEADERS += \
@@ -43,7 +45,9 @@ HEADERS += \
     ../simulateur/debug.h \
     codeview.h \
     memoryview.h \
-    sdlwidget.h
+    sdlwidget.h \
+    ../simulateur/screen.h \
+    ../simulateur/simulateur.h
 
 FORMS += \
         mainwindow.ui

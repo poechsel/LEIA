@@ -11,6 +11,11 @@
 #include "../simulateur/utilities.h"
 #include "../simulateur/debug.h"
 #include "memoryview.h"
+#include "sdlwidget.h"
+#include "../simulateur/simulateur.h"
+#include <QtConcurrent/QtConcurrent>
+#include <QGroupBox>
+#include <QPushButton>
 
 namespace Ui {
 class MainWindow;
@@ -23,12 +28,13 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
+    void simulate(Param &param, Machine &machine);
 private:
     QStringList _code;
     QListWidget *_list_view;
     CodeView *_code_view;
     MemoryView *_memory_view;
+    SDLWidget *_screen_view;
 
 private slots:
    void open_file();

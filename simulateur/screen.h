@@ -10,22 +10,23 @@
 class Screen {
     public:
         virtual ~Screen() {};
-    virtual void update(uword *memory) = 0;
+    virtual void updateContent(uword *memory) = 0;
 };
 
 class SDLScreen : public Screen {
     public:
         SDLScreen();
         ~SDLScreen();
-        virtual void update(uword *memory);
-    private:
+        virtual void updateContent(uword *memory);
+    protected:
         void action();
-        void create();
-        void close();
-
+        virtual void createsdl();
+        virtual void closesdl();
         SDL_Window *_window;
         SDL_Renderer *_renderer;
         SDL_Texture *_texture;
+
+    private:
 
         volatile bool _refresh;
         bool _force_quit;
@@ -34,11 +35,5 @@ class SDLScreen : public Screen {
 
 };
 
-/* this function deals with the screen
- * machine -> the vm
- * force_quit -> to detect if we lust close the screen (or shut-down the simulator)
- * refr -> if true we must refresh the screen and wait. Otherwise nothing to be done
- */
-void simulate_screen(const Machine& machine, bool &force_quit, volatile bool &refr, bool activate_refresh_command = true);
 
 #endif

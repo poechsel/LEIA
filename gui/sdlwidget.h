@@ -4,14 +4,23 @@
 #include <QObject>
 #include <QWidget>
 #include <SDL2/SDL.h>
-#undef main
+#include "../simulateur/screen.h"
+#include <QDebug>
 
-class SDLWidget : public QWidget
+#include <QPainter>
+
+#undef main
+class SDLWidget : public QWidget, public Screen
 {
     Q_OBJECT
 public:
     explicit SDLWidget(QWidget *parent = nullptr);
-
+    ~SDLWidget();
+    void updateContent(uword *memory);
+    void paintEvent(QPaintEvent *event);
+private:
+    QRgb* _pixels;
+    QImage _image;
 signals:
 
 public slots:

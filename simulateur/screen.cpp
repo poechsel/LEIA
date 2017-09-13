@@ -4,30 +4,30 @@ SDLScreen::SDLScreen():
     _refresh(false),
 _force_quit(false)
 {
-    create();
+    createsdl();
     _thread = std::thread(&SDLScreen::action, this);
 }
 
 SDLScreen::~SDLScreen() {
     this->_force_quit = true;
     _thread.join();
-    close();
+    closesdl();
 }
 
-void SDLScreen::update(uword *memory) {
+void SDLScreen::updateContent(uword *memory) {
     _memory = memory;
     _refresh = true;
     while (_refresh) {};
 }
 
-void SDLScreen::create() {
+void SDLScreen::createsdl() {
 	SDL_Init(SDL_INIT_VIDEO);
 	_window = SDL_CreateWindow("Asm", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH*2, HEIGHT*2, 0);
 	_renderer = SDL_CreateRenderer(_window, -1, 0);
 	_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, WIDTH, HEIGHT);
 }
 
-void SDLScreen::close() {
+void SDLScreen::closesdl() {
     if (_texture)
 	SDL_DestroyTexture(_texture);
     _texture = 0;
@@ -79,6 +79,6 @@ void SDLScreen::action() {
 		}
 	}
 	_refresh = false;
-    close();
+    closesdl();
 }
 

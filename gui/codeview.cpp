@@ -10,7 +10,7 @@ CodeView::CodeView(QWidget *parent):
 void CodeView::update() {
     QStringList code;
     for (int i = 0; i < 0x10000; ++i) {
-        code.append(QString::fromStdString(dissassemble(_machine->memory[i])));
+        code.append(QString("[") + QString::number(i) + QString("]") + QString::fromStdString(dissassemble(_machine->memory[i])));
     }
     this->clear();
     this->addItems(code);
@@ -21,7 +21,7 @@ void CodeView::updateCode(int row) {
     if (!_machine) return;
     QString foo = QString::fromStdString(dissassemble(_machine->memory[row]));
     if (row < this->count())
-        this->item(row)->setText(foo);
+        this->item(row)->setText(QString("[") + QString::number(row) + QString("]") + foo);
 }
 
 void CodeView::setMachine(Machine &machine) {
