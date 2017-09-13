@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QWidget>
+#include <SDL2/SDL.h>
+#undef main
 
 class SDLWidget : public QWidget
 {

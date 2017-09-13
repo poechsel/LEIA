@@ -338,7 +338,8 @@ class CustomPush(_Instruction):
         self.jump_line = 2
     
     def parse(self, env):
-        return Wmem(["wmem", self.words[1], "[r7]"], "", "", "").parse(env) + Add(["sub", "r7", "r7", "1"], "", "", "").parse(env)
+        op = "add" if env.reverse_stack else "sub"
+        return Wmem(["wmem", self.words[1], "[r7]"], "", "", "").parse(env) + Add([op, "r7", "r7", "1"], "", "", "").parse(env)
 
 class CustomPop(_Instruction):
     def __init__(self, *args):
@@ -347,7 +348,8 @@ class CustomPop(_Instruction):
         self.jump_line = 2
     
     def parse(self, env):
-        return Sub(["add", "r7", "r7", "1"], "", "", "").parse(env) + Rmem(["rmem", self.words[1], "[r7]"], "", "", "").parse(env)
+        op = "sub" if env.reverse_stack else "add"
+        return Sub([op, "r7", "r7", "1"], "", "", "").parse(env) + Rmem(["rmem", self.words[1], "[r7]"], "", "", "").parse(env)
 
 
 class Letl(_Instruction):
@@ -579,6 +581,7 @@ class _Environment:
         self.instr = []
         self.instr_set = {}
         self.already_loaded = {}
+        self.reverse_stack = False
         #a small introspection trick. We get all the instruction on the fly. 
         #If the name begins with _ we don't add it. Then, the name of the 
         #instructions correspond to the name of the class lowered and when 
@@ -666,12 +669,19 @@ def second_pass(env):
     return None if None in instr else [j for i in instr for j in i]
 
 if __name__ == '__main__':
-    if len(sys.argv) >= 2:
-        path = sys.argv[1]
+    stack_direction = 0
+    path = ""
+    for i in sys.argv[1:]:
+        if i == "--reverse_stack":
+            stack_direction = 1
+        else :
+            path = i
+    if path != "":
         f = load_file(path)
         if f is None:
             print("Input file wasn't able to be loaded")
         env = _Environment()
+        env.reverse_stack = stack_direction
         first_pass(path, f, env)
         code = second_pass(env)
         if code is None:
@@ -682,5 +692,5 @@ if __name__ == '__main__':
                 for c in code:
                     out.write(str(hex(c))[2:].zfill(4) + "\n")
     else:
-        print("please input a file")
+        print("Please input a file")
              
