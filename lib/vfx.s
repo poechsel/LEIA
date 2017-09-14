@@ -10,7 +10,9 @@ putstr:
 		copy r12 r3
 		copy r13 r6
 		copy r14 r15
+        copy r9 r4
 		call putchar
+        copy r4 r9
 		snif r4 eq 0
 			refresh
 		copy r1 r10
@@ -97,7 +99,7 @@ line:
 	sub r5 r5 r6
 	add r5 r5 r1
 	add r2 r2 1
-	.push r5
+    copy r9 r5
 
 	; all the case are to reduce the problem to one octant
 	snif r3 ge r1   ;si x2 >= x1
@@ -141,7 +143,7 @@ line:
 
 
 	copy r8 r2
-	.pop r2
+    copy r2 r9
 	; main loop
 	letl r4 -2
 	__line_loop:
