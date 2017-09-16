@@ -13,6 +13,7 @@ class MemoryView : public QTableWidget
 public:
     MemoryView(QWidget *parent = 0);
     void update();
+    void updateOptimize(QVector<int> indices);
     void setMachine(Machine &machine);
 
 public slots:

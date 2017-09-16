@@ -27,7 +27,7 @@ void MemoryView::setMachine(Machine &machine) {
 }
 
 void MemoryView::_updateRow(int row, int value) {
-    if (row < this->rowCount()) {
+    if (0 < row && row < this->rowCount()) {
         this->item(row, 0)->setText(QString::number(value));
         this->item(row, 1)->setText("0x" + QString::number(value, 16).rightJustified(4, '0'));
         this->item(row, 2)->setText(QString((0<value && value < 128) ? (char)value : ' '));
@@ -36,6 +36,14 @@ void MemoryView::_updateRow(int row, int value) {
     this->setItem(row, 1, new QTableWidgetItem("0x" + QString::number(value, 16)));
     this->setItem(row, 2, new QTableWidgetItem(QString((0 < value && value < 128) ? (char)value : ' ')));
     */
+}
+
+void MemoryView::updateOptimize(QVector<int> indices) {
+    if (this->_machine) {
+        for (int t : indices) {
+            _updateRow(t, this->_machine->memory[t]);
+        }
+    }
 }
 
 void MemoryView::update() {

@@ -14,6 +14,7 @@ public:
     CodeView(QWidget *parent = 0);
     void setMachine(Machine &machine);
     void update();
+    void updateOptimize(QVector<int> indices);
 
 protected:
     void refresh();

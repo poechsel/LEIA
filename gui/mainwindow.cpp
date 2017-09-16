@@ -38,22 +38,23 @@ MainWindow::MainWindow(QWidget *parent) :
         layout->addLayout(layout_w_controls);
 
         QGroupBox* panel_control = new QGroupBox("Contrôles");
+        panel_control->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
         layout_w_controls->addWidget(panel_control);
         QGridLayout* grid_control_layout = new QGridLayout;
+        grid_control_layout->setSizeConstraint(QLayout::SetMinimumSize);
 
-        QPushButton* button_single_step = new QPushButton("Single");
-        QPushButton* button_next_step = new QPushButton("Next");
-        QPushButton* button_breakpoint = new QPushButton("Break");
-        QPushButton* button_play = new QPushButton("Play");
-        QPushButton* button_stop = new QPushButton("Stop");
-        grid_control_layout->addWidget(button_single_step, 0, 0);
-        grid_control_layout->addWidget(button_next_step, 0, 1);
-        grid_control_layout->addWidget(button_breakpoint, 0, 2);
-        grid_control_layout->addWidget(button_play, 1, 0);
-        grid_control_layout->addWidget(button_stop, 1, 1);
+        _button_single_step = new QPushButton("Single");
+        _button_next_step = new QPushButton("Next");
+        _button_breakpoint = new QPushButton("Break");
+        _button_play = new QPushButton("Play");
+        _button_stop = new QPushButton("Stop");
+        grid_control_layout->addWidget(_button_single_step, 0, 0);
+        grid_control_layout->addWidget(_button_next_step, 0, 1);
+        grid_control_layout->addWidget(_button_breakpoint, 0, 2);
+        grid_control_layout->addWidget(_button_play, 1, 0);
+        grid_control_layout->addWidget(_button_stop, 1, 1);
 
         panel_control->setLayout(grid_control_layout);
-
         layout_w_controls->addWidget(_screen_view);
 
     _screen_view->resize(120, 340);
@@ -64,6 +65,104 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(_memory_view, SIGNAL(cellChanged(int,int)), _memory_view, SLOT(editCell(int,int)));
     connect(_memory_view, SIGNAL(memoryChanged(int)), _code_view, SLOT(updateCode(int)));
+
+    connect(_button_single_step, SIGNAL(released()), this, SLOT(simulateSingleStep()));
+    connect(_button_next_step, SIGNAL(released()), this, SLOT(simulateSingleStepJumpCall()));
+    connect(_button_breakpoint, SIGNAL(released()), this, SLOT(simulateNextBreakpoint()));
+    connect(_button_play, SIGNAL(released()), this, SLOT(simulationStart()));
+    connect(_button_stop, SIGNAL(released()), this, SLOT(simulationStop()));
+    connect(this, SIGNAL(workingEnd()), this, SLOT(activateSimulateControls()));
+}
+
+void MainWindow::simulateSingleStep() {
+    int w = this->evaluateAndMem();
+    QVector<int> indices;
+    if (w >= 0) {
+        indices.push_back(w);
+    }
+    _code_view->updateOptimize(indices);
+    _memory_view->updateOptimize(indices);
+}
+
+void MainWindow::simulateSingleStepJumpCall() {
+    uword previous_pc = -1;
+    _param.skip_call = true;
+    _machine.in_call = false;
+    QVector<int> indices;
+    do {
+        previous_pc = _machine.pc;
+        int w = this->evaluateAndMem();
+        if (w >= 0)
+            indices.push_back(w);
+    } while (_machine.in_call && previous_pc != _machine.pc);
+    _param.skip_call = false;
+    _code_view->updateOptimize(indices);
+    _memory_view->updateOptimize(indices);
+}
+void MainWindow::simulateNextBreakpoint() {
+    this->deactivateSimulateControls();
+    this->_use_breakpoints = true;
+    this->_stop_simulation = false;
+    QtConcurrent::run(this, &MainWindow::_simulateNextBreakpoint_worker);
+
+}
+
+void MainWindow::deactivateSimulateControls() {
+    this->_button_breakpoint->setEnabled(false);
+    this->_button_single_step->setEnabled(false);
+    this->_button_next_step->setEnabled(false);
+    this->_button_stop->setEnabled(true);
+    this->_button_play->setEnabled(false);
+}
+void MainWindow::activateSimulateControls() {
+    this->_button_breakpoint->setEnabled(true);
+    this->_button_single_step->setEnabled(true);
+    this->_button_next_step->setEnabled(true);
+    this->_button_stop->setEnabled(false);
+    this->_button_play->setEnabled(true);
+}
+
+void MainWindow::_simulateNextBreakpoint_worker() {
+    uword previous_pc = -1;
+    QVector<int> indices;
+    QSet<int> indices_cache;
+    do {
+        previous_pc = _machine.pc;
+        int w = this->evaluateAndMem();
+        if (w >= 0 && indices_cache.find(w) == indices_cache.end()) {
+            indices.push_back(w);
+            indices_cache.insert(w);
+        }
+    } while (!(
+             (this->_use_breakpoints && this->_code_view->item(_machine.pc)->checkState() == Qt::Checked)
+         || previous_pc == _machine.pc
+         || this->_stop_simulation
+             ));
+    _code_view->updateOptimize(indices);
+    _memory_view->updateOptimize(indices);
+    this->activateSimulateControls();
+}
+
+void MainWindow::simulationStart() {
+    qDebug()<<"starting\n";
+    this->deactivateSimulateControls();
+    this->_use_breakpoints = false;
+    this->_stop_simulation = false;
+    QtConcurrent::run(this, &MainWindow::_simulateNextBreakpoint_worker);
+
+}
+
+void MainWindow::simulationStop() {
+    this->_stop_simulation = true;
+}
+
+int MainWindow::evaluateAndMem() {
+    auto opcode = _machine.memory[_machine.pc];
+    evaluate(_machine.memory[_machine.pc], _machine, _param, (Screen*) _screen_view);
+    if ((opcode >> 12) == 0b0000) {
+       return _machine.registers[toUWord(opcode)];
+    }
+    return -1;
 }
 
 void MainWindow::open_file() {
@@ -76,26 +175,24 @@ void MainWindow::open_file() {
         return;
 
     _code.clear();
-    Machine machine;
-    readFromStr(file_name.toStdString(), machine);
-    loadCodeToMemory(machine);
+    readFromStr(file_name.toStdString(), _machine);
+    loadCodeToMemory(_machine);
 
-    _code_view->setMachine(machine);
-    _memory_view->setMachine(machine);
+    _code_view->setMachine(_machine);
+    _memory_view->setMachine(_machine);
     _code_view->update();
     _memory_view->update();
     connect(_memory_view, SIGNAL(cellChanged(int,int)), _memory_view, SLOT(editCell(int,int)));
 
     ClockTicks ct = clockticks_new();
-    Param param;
-        param.step_by_step = false;
-        param.debug_output = false;
-        param.fast_mode = true;
-        param.full_debug = false;
-        param.skip_call = false;
-        machine.clock_ticks = ct;
+        _param.step_by_step = false;
+        _param.debug_output = false;
+        _param.fast_mode = true;
+        _param.full_debug = false;
+        _param.skip_call = false;
+        _machine.clock_ticks = ct;
 
-       QtConcurrent::run(this, &MainWindow::simulate,param, machine);
+      // QtConcurrent::run(this, &MainWindow::simulate, _param, _machine);
 }
 
 void MainWindow::simulate(Param &param, Machine &machine) {

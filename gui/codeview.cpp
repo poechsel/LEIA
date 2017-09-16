@@ -15,6 +15,18 @@ void CodeView::update() {
     this->clear();
     this->addItems(code);
     this->refresh();
+    if (this->_machine)
+    this->setCurrentRow(this->_machine->pc);
+}
+
+void CodeView::updateOptimize(QVector<int> indices) {
+    if (this->_machine) {
+        for (int t : indices) {
+            QString txt = QString("[") + QString::number(t) + QString("]") + QString::fromStdString(dissassemble(_machine->memory[t]));
+            this->item(t)->setText(txt);
+        }
+        this->setCurrentRow(this->_machine->pc);
+    }
 }
 
 void CodeView::updateCode(int row) {
