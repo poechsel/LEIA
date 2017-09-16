@@ -24,15 +24,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QHBoxLayout *layout = new QHBoxLayout;
 
+    QVBoxLayout *layout_views = new QVBoxLayout;
     _memory_view = new MemoryView;
-//    http://www.walletfox.com/course/qtcheckablelist.php
-    layout->addWidget(_memory_view);
+    layout_views->addWidget(_memory_view);
+    _registers_view = new RegistersView;
+    layout_views->addWidget(_registers_view);
+    layout->addLayout(layout_views);
 
     _code_view = new CodeView;
     layout->addWidget(_code_view);
 
 
-        _screen_view = new SDLWidget;
+        _screen_view = new QtScreen;
 
         QVBoxLayout *layout_w_controls = new QVBoxLayout;
         layout->addLayout(layout_w_controls);
@@ -64,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setCentralWidget(zoneCentrale);
 
     connect(_memory_view, SIGNAL(cellChanged(int,int)), _memory_view, SLOT(editCell(int,int)));
+    connect(_registers_view, SIGNAL(cellChanged(int,int)), _registers_view, SLOT(editCell(int,int)));
     connect(_memory_view, SIGNAL(memoryChanged(int)), _code_view, SLOT(updateCode(int)));
 
     connect(_button_single_step, SIGNAL(released()), this, SLOT(simulateSingleStep()));
@@ -72,6 +76,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_button_play, SIGNAL(released()), this, SLOT(simulationStart()));
     connect(_button_stop, SIGNAL(released()), this, SLOT(simulationStop()));
     connect(this, SIGNAL(workingEnd()), this, SLOT(activateSimulateControls()));
+    activateSimulateControls();
 }
 
 void MainWindow::simulateSingleStep() {
@@ -82,6 +87,7 @@ void MainWindow::simulateSingleStep() {
     }
     _code_view->updateOptimize(indices);
     _memory_view->updateOptimize(indices);
+    _registers_view->update();
 }
 
 void MainWindow::simulateSingleStepJumpCall() {
@@ -98,6 +104,7 @@ void MainWindow::simulateSingleStepJumpCall() {
     _param.skip_call = false;
     _code_view->updateOptimize(indices);
     _memory_view->updateOptimize(indices);
+    _registers_view->update();
 }
 void MainWindow::simulateNextBreakpoint() {
     this->deactivateSimulateControls();
@@ -125,13 +132,15 @@ void MainWindow::activateSimulateControls() {
 void MainWindow::_simulateNextBreakpoint_worker() {
     uword previous_pc = -1;
     QVector<int> indices;
-    QSet<int> indices_cache;
+    bool indices_cache[0x10000];
+    for (int i = 0; i < 0x10000; ++i)
+        indices_cache[i] = false;
     do {
         previous_pc = _machine.pc;
         int w = this->evaluateAndMem();
-        if (w >= 0 && indices_cache.find(w) == indices_cache.end()) {
+        if (w >= 0 && !indices_cache[w]) {
             indices.push_back(w);
-            indices_cache.insert(w);
+            indices_cache[w] = true;
         }
     } while (!(
              (this->_use_breakpoints && this->_code_view->item(_machine.pc)->checkState() == Qt::Checked)
@@ -140,6 +149,7 @@ void MainWindow::_simulateNextBreakpoint_worker() {
              ));
     _code_view->updateOptimize(indices);
     _memory_view->updateOptimize(indices);
+    _registers_view->update();
     this->activateSimulateControls();
 }
 
@@ -180,8 +190,10 @@ void MainWindow::open_file() {
 
     _code_view->setMachine(_machine);
     _memory_view->setMachine(_machine);
+    _registers_view->setMachine(_machine);
     _code_view->update();
     _memory_view->update();
+    _registers_view->update();
     connect(_memory_view, SIGNAL(cellChanged(int,int)), _memory_view, SLOT(editCell(int,int)));
 
     ClockTicks ct = clockticks_new();

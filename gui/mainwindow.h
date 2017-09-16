@@ -11,11 +11,12 @@
 #include "../simulateur/utilities.h"
 #include "../simulateur/debug.h"
 #include "memoryview.h"
-#include "sdlwidget.h"
+#include "qtscreen.h"
 #include "../simulateur/simulateur.h"
 #include <QtConcurrent/QtConcurrent>
 #include <QGroupBox>
 #include <QPushButton>
+#include "registersview.h"
 
 namespace Ui {
 class MainWindow;
@@ -54,7 +55,8 @@ void _simulateNextBreakpoint_worker();
     QListWidget *_list_view;
     CodeView *_code_view;
     MemoryView *_memory_view;
-    SDLWidget *_screen_view;
+    RegistersView *_registers_view;
+    QtScreen *_screen_view;
 
 
 

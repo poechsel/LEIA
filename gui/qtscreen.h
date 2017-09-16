@@ -10,12 +10,12 @@
 #include <QPainter>
 
 #undef main
-class SDLWidget : public QWidget, public Screen
+class QtScreen : public QWidget, public Screen
 {
     Q_OBJECT
 public:
-    explicit SDLWidget(QWidget *parent = nullptr);
-    ~SDLWidget();
+    explicit QtScreen(QWidget *parent = nullptr);
+    ~QtScreen();
     void updateContent(uword *memory);
     void paintEvent(QPaintEvent *event);
 private:

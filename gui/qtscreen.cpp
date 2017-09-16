@@ -1,6 +1,6 @@
-#include "sdlwidget.h"
+#include "qtscreen.h"
 
-SDLWidget::SDLWidget(QWidget *parent) :
+QtScreen::QtScreen(QWidget *parent) :
     QWidget(parent), Screen()
 
 {
@@ -15,19 +15,26 @@ SDLWidget::SDLWidget(QWidget *parent) :
         this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
 }
 
-SDLWidget::~SDLWidget() {
+QtScreen::~QtScreen() {
     delete[] _pixels;
 }
 
-void SDLWidget::paintEvent(QPaintEvent *event) {
+void QtScreen::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
     qDebug()<<"paint event\n";
     QImage image = QImage((uchar*)_pixels, WIDTH, HEIGHT, QImage::Format_ARGB32);
 
-    painter.drawImage(0, 0, image);
+    QRectF rectangle;
+    rectangle.setX(0);
+    rectangle.setY(0);
+    rectangle.setWidth(this->width());
+    float ratio = (float)HEIGHT / (float)WIDTH;
+    int height = ratio * this->width();
+    rectangle.setHeight(height);
+    painter.drawImage(rectangle, image);
 }
 
-void SDLWidget::updateContent(uword *memory) {
+void QtScreen::updateContent(uword *memory) {
     qDebug()<<"drawing\n";
     for (unsigned int i = MEM_SCREEN_BEGIN; i <= 0xFFFF; ++i) {
         word pixel = (memory) ? memory[i] : 0;
