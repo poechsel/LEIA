@@ -11,7 +11,9 @@
 
 #include <QPainter>
 
-#undef main
+
+
+
 class QtScreen : public QWidget, public Screen
 {
     Q_OBJECT
@@ -20,6 +22,7 @@ public:
     ~QtScreen();
     void updateContent(uword *memory);
     void paintEvent(QPaintEvent *event);
+
 private:
     QRgb* _pixels;
     QImage _image;

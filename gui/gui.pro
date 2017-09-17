@@ -49,7 +49,8 @@ HEADERS += \
     qtscreen.h \
     registersview.h \
     dataview.h \
-    memoryview.h
+    memoryview.h \
+    aspectratiosingleitemlayout.h
 
 FORMS += \
         mainwindow.ui

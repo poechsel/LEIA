@@ -22,6 +22,9 @@
 #include <QSplitter>
 #include <QMessageBox>
 
+#include <QTextEdit>
+#include "aspectratiosingleitemlayout.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -52,6 +55,7 @@ public slots:
 
 signals:
     void workingEnd();
+    void consoleUpdate(QString text);
 
 private:
     int evaluateAndMem();
@@ -82,6 +86,8 @@ private:
     Param _param;
 
     QString _last_path;
+
+    QTextEdit *_console;
 
 private slots:
    void open_file();

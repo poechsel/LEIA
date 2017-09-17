@@ -19,7 +19,7 @@ QtScreen::~QtScreen() {
     delete[] _pixels;
 }
 
-void QtScreen::paintEvent(QPaintEvent *event) {
+void QtScreen::paintEvent(QPaintEvent*) {
     QPainter painter(this);
     qDebug()<<"paint event\n";
     QImage image = QImage((uchar*)_pixels, WIDTH, HEIGHT, QImage::Format_ARGB32);

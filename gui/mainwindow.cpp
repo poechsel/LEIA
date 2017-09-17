@@ -56,7 +56,14 @@ MainWindow::MainWindow(QWidget *parent) :
         grid_control_layout->addWidget(_button_stop, 1, 1);
 
         panel_control->setLayout(grid_control_layout);
-        layout_w_controls->addWidget(_screen_view);
+
+        AspectRatioSingleItemLayout *screen_layout = new AspectRatioSingleItemLayout(WIDTH/HEIGHT);
+        screen_layout->addWidget(_screen_view);
+        layout_w_controls->addLayout(screen_layout);
+        _console = new QTextEdit;
+        _console->setReadOnly(true);
+        layout_w_controls->addWidget(_console);
+
 
     _screen_view->resize(120, 340);
 
@@ -77,6 +84,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_registers_view, SIGNAL(sendSelected(int)), _memory_view, SLOT(focusOn(int)));
     connect(_code_view, SIGNAL(switchToMemory(int)), _memory_view, SLOT(focusOn(int)));
     connect(_memory_view, SIGNAL(switchToCode(int)), _code_view, SLOT(setPosition(int)));
+
+    connect(this, SIGNAL(consoleUpdate(QString)), _console, SLOT(insertPlainText(QString)));
 
     activateSimulateControls();
 }
@@ -170,7 +179,10 @@ void MainWindow::simulationStop() {
 
 int MainWindow::evaluateAndMem() {
     auto opcode = _machine.memory[_machine.pc];
-    evaluate(_machine.memory[_machine.pc], _machine, _param, (Screen*) _screen_view);
+    std::string out = evaluate(_machine.memory[_machine.pc], _machine, _param, (Screen*) _screen_view);
+    QString out_q = QString::fromStdString(out);
+    if (out_q != "")
+        emit consoleUpdate(out_q);
     if ((opcode >> 12) == 0b0000) {
        return _machine.registers[toUWord(opcode)];
     }
@@ -229,6 +241,8 @@ void MainWindow::open_file() {
 
     _code.clear();
     readFromStr(file_name.toStdString(), _machine);
+    _machine.pc = 0;
+    _console->setText("");
     loadCodeToMemory(_machine);
 
     _code_view->setMachine(_machine);

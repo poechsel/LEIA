@@ -4,9 +4,10 @@
 #include "structs.h"
 #include "debug.h"
 #include "screen.h"
+#include <sstream>
 
 /* evaluate a instruction */
-void evaluate(const uword opcode, Machine &machine, Param &param, Screen *screen);
+std::string evaluate(const uword opcode, Machine &machine, Param &param, Screen *screen);
 /* simulate a program */
 void simulate(Machine &machine, Param &param, Screen *screen);
 /* debugger */

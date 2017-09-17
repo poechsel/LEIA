@@ -94,9 +94,19 @@ std::string dissassemble(const uword opcode) {
 			break;}
 		case 0b1110:
 			switch((opcode >> 10) & 0b11) {
-				case 0b00:
+				case 0b00: {
 					return "refresh";
-					break;
+					break;}
+				case 0b01: {
+					return "print " + getRegStr(toUWord(opcode));
+					break;}
+				case 0b10: {
+                    char temp[2];
+                    temp[0] = (char)(opcode & 0xff); 
+                    temp[1] = 0;
+					return "print " + std::string(temp);
+					break;}
+                           
 			}
 			break;
 		case 0b1111: //rmem
