@@ -505,6 +505,7 @@ class Call(_Instruction):
         if isinstance(temp, list):
             try:
                 temp = env.labels[self.words[1]]
+                env.called_labels.append(self.words[1])
             except:
                 return [[_Erreur(self, "Label", "not defined")]]
         return [self.addThing(0b1010, 12) + self.addThing(temp >> 4, 0)]
@@ -580,6 +581,7 @@ class _Environment:
     def __init__(self):
         self.line = 0
         self.labels = {}
+        self.called_labels = []
         self.instr = []
         self.instr_set = {}
         self.already_loaded = {}
@@ -604,29 +606,6 @@ def load_file(file_path):
         #then put a space between comments to avoid problems
         #then split it to get the words
         PATTERN = re.compile(r'''((?:[^\s"']|"[^"]*"|'[^']*')+)''')
-        """ o = []
-        for l, line in enumerate(file):
-            if line.strip() != '':
-                lined = line.strip().lower().replace(";", " ;").split()
-                line_out = []
-                print(lined)
-                temp = ""
-                for e in lined:
-                    print(e)
-                    if e[0] == "\"":
-                        temp += e
-                    if temp != "":
-                        temp += " " + e
-                    else:
-                        line_out += e
-                    if e[-1] == "\"":
-                        line_out += [temp]
-                        temp = ""
-                if temp != "":
-                    line_out += [temp]
-                o += [(l, line_out)]
-        return o
-        """
         o = []
         for l, line in enumerate(file):
             nl = PATTERN.split(line.strip().replace(";", " ;"))[1::2]
@@ -671,20 +650,32 @@ def second_pass(env):
     instr = [l.getOpcodes(env) for l in env.instr]
     return None if None in instr else [j for i in instr for j in i]
 
+def write_debug_file (env, path):
+    f, _ = os.path.splitext(path)
+    debug_file = f + ".debug"
+    labels = []
+    seen = {}
+    """
+    for l in env.called_labels :
+        if not l in seen :
+            labels.append((l, env.labels[l]))
+            seen[l] = True
+    """
+    labels = [(k, env.labels[k]) for k in env.labels]
+    labels.sort(key = lambda x : x[1])
+    with open(debug_file, "w") as out:
+        for l, i in labels:
+            out.write(l + " " + str(i) + "\n")
+
 if __name__ == '__main__':
     stack_direction = 0
     parser = argparse.ArgumentParser(description='Assemble a LEIA asm file')
     parser.add_argument("path", help = "path of the file to assemble")
     parser.add_argument("-r", "--reverse_stack", action="store_true", help  = "reverse the direction in which the stack grows")
     parser.add_argument("-o", "--out", help = "select output file")
+    parser.add_argument("-d", "--debug", action = "store_true", help = "write a debuging file")
     args = parser.parse_args()
-    """
-    for i in sys.argv[1:]:
-        if i == "--reverse_stack":
-            stack_direction = 1
-        else :
-            path = i
-    """
+
     if args.path != "":
         f = load_file(os.path.abspath(args.path))
         if f is None:
@@ -703,6 +694,9 @@ if __name__ == '__main__':
             with open(out_path, "w") as out:
                 for c in code:
                     out.write(str(hex(c))[2:].zfill(4) + "\n")
+            if args.debug:
+                write_debug_file(env, out_path)
+
     else:
         print("Please input a file")
              
