@@ -34,7 +34,8 @@ SOURCES += \
     ../simulateur/simulateur.cpp \
     qtscreen.cpp \
     registersview.cpp \
-    dataview.cpp
+    dataview.cpp \
+    memoryview.cpp
 
 
 HEADERS += \
@@ -47,7 +48,8 @@ HEADERS += \
     ../simulateur/simulateur.h \
     qtscreen.h \
     registersview.h \
-    dataview.h
+    dataview.h \
+    memoryview.h
 
 FORMS += \
         mainwindow.ui

@@ -7,8 +7,10 @@
 #include "../simulateur/structs.h"
 #include "../simulateur/debug.h"
 #include <QMenu>
+#include <QTableWidget>
+#include <QHeaderView>
 
-class CodeView: public QListWidget
+class CodeView: public QTableWidget
 {
     Q_OBJECT
 public:
@@ -16,6 +18,7 @@ public:
     void setMachine(Machine &machine);
     void update();
     void updateOptimize(QVector<int> indices);
+    bool isBreakpoint(int row);
     void setLabels(QString *labels) {_labels = labels;}
 
 protected:
@@ -24,10 +27,15 @@ protected:
     Machine *_machine;
     QString *_labels;
 
+signals:
+    void switchToMemory(int);
+
 public slots:
     void updateCode(int row);
+    void setPosition(int);
     void showContextMenu(const QPoint &);
     void setPositionToCurrent();
+    void requestSwitchToMemory();
     void setPositionToNext();
 };
 

@@ -18,6 +18,8 @@
 #include "dataview.h"
 #include "registersview.h"
 #include <QDir>
+#include "memoryview.h"
+#include <QSplitter>
 #include <QMessageBox>
 
 namespace Ui {
@@ -37,6 +39,8 @@ public:
     void openDebugInformations(QFile &file);
 
 public slots:
+    void closeCustom(bool){close();}
+
     void simulateSingleStep();
     void simulateSingleStepJumpCall();
     void simulateNextBreakpoint();
@@ -58,7 +62,7 @@ private:
     QStringList _code;
     QListWidget *_list_view;
     CodeView *_code_view;
-    DataView *_memory_view;
+    MemoryView *_memory_view;
     RegistersView *_registers_view;
     QtScreen *_screen_view;
 
@@ -76,6 +80,8 @@ private:
 
     Machine _machine;
     Param _param;
+
+    QString _last_path;
 
 private slots:
    void open_file();

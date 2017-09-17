@@ -20,6 +20,9 @@ DataView::DataView(int size, QString label_formatting, QWidget *parent):
     this->setHorizontalHeaderItem(0, new QTableWidgetItem(QString("Dec")));
     this->setHorizontalHeaderItem(1, new QTableWidgetItem(QString("Hex")));
     this->setHorizontalHeaderItem(2, new QTableWidgetItem(QString("Char")));
+
+    this->setSelectionBehavior(QAbstractItemView::SelectRows);
+    //this->setShowGrid(false);
 }
 
 void DataView::setData(uword *data) {

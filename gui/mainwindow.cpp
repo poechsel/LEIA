@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
@@ -8,28 +9,22 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QMenu *menuFichier = menuBar()->addMenu("&Fichier");
     QAction *action_open_file = new QAction(tr("&Open"), this);
+    QAction *action_close = new QAction(tr("&Close"), this);
     connect(action_open_file, &QAction::triggered, this, &MainWindow::open_file);
+    connect(action_close, SIGNAL(triggered(bool)), this, SLOT(closeCustom(bool)));
     menuFichier->addAction(action_open_file);
-
-    QMenu *menuEdition = menuBar()->addMenu("&Edition");
-
-    QMenu *menuAffichage = menuBar()->addMenu("&Affichage");
-    QWidget *zoneCentrale = new QWidget;
-    QLineEdit *nom = new QLineEdit;
-
-    QLineEdit *prenom = new QLineEdit;
-    QLineEdit *age = new QLineEdit;
+    menuFichier->addAction(action_close);
 
 
 
-    QHBoxLayout *layout = new QHBoxLayout;
+    QSplitter *layout = new QSplitter(Qt::Horizontal);
 
-    QVBoxLayout *layout_views = new QVBoxLayout;
-    _memory_view = new DataView(0x10000);
+    QSplitter *layout_views = new QSplitter(Qt::Vertical);
+    _memory_view = new MemoryView;
     layout_views->addWidget(_memory_view);
     _registers_view = new RegistersView;
     layout_views->addWidget(_registers_view);
-    layout->addLayout(layout_views);
+    layout->addWidget(layout_views);
 
     _code_view = new CodeView;
     _code_view->setLabels(_labels);
@@ -39,7 +34,9 @@ MainWindow::MainWindow(QWidget *parent) :
         _screen_view = new QtScreen;
 
         QVBoxLayout *layout_w_controls = new QVBoxLayout;
-        layout->addLayout(layout_w_controls);
+        QWidget *widget_controls = new QWidget;
+        widget_controls->setLayout(layout_w_controls);
+        layout->addWidget(widget_controls);
 
         QGroupBox* panel_control = new QGroupBox("Contrôles");
         panel_control->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -64,8 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _screen_view->resize(120, 340);
 
 
-    zoneCentrale->setLayout(layout);
-    setCentralWidget(zoneCentrale);
+    setCentralWidget(layout);
 
     connect(_memory_view, SIGNAL(cellChanged(int,int)), _memory_view, SLOT(editCell(int,int)));
     connect(_registers_view, SIGNAL(cellChanged(int,int)), _registers_view, SLOT(editCell(int,int)));
@@ -79,6 +75,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(workingEnd()), this, SLOT(activateSimulateControls()));
 
     connect(_registers_view, SIGNAL(sendSelected(int)), _memory_view, SLOT(focusOn(int)));
+    connect(_code_view, SIGNAL(switchToMemory(int)), _memory_view, SLOT(focusOn(int)));
+    connect(_memory_view, SIGNAL(switchToCode(int)), _code_view, SLOT(setPosition(int)));
 
     activateSimulateControls();
 }
@@ -147,7 +145,7 @@ void MainWindow::_simulateNextBreakpoint_worker() {
             indices_cache[w] = true;
         }
     } while (!(
-             (this->_use_breakpoints && this->_code_view->item(_machine.pc)->checkState() == Qt::Checked)
+             (this->_use_breakpoints && this->_code_view->isBreakpoint(_machine.pc)/*&& this->_code_view->item(_machine.pc)->checkState() == Qt::Checked*/)
          || previous_pc == _machine.pc
          || this->_stop_simulation
              ));
@@ -208,7 +206,7 @@ void MainWindow::openDebugInformations(QFile &file) {
 void MainWindow::open_file() {
     disconnect(_memory_view, SIGNAL(cellChanged(int,int)), _memory_view, SLOT(editCell(int,int)));
     QString file_name = QFileDialog::getOpenFileName(this,
-    tr("Open code"), "/home/pierre/LEIA/", "");
+    tr("Open code"), _last_path, "");
 
     int extension_pos = file_name.lastIndexOf('.');
     QString debug_path = file_name.leftRef(extension_pos) + ".debug";
@@ -225,6 +223,7 @@ void MainWindow::open_file() {
     }
 
     QFile file(file_name);
+    _last_path = QDir(file_name).absolutePath();
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return;
 
