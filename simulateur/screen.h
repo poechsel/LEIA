@@ -9,7 +9,7 @@
 class Screen {
     public:
         virtual ~Screen() {};
-    virtual void updateContent(uword *memory) = 0;
+        virtual void updateContent(uword *memory) = 0;
 };
 
 

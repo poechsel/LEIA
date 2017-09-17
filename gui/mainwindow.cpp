@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     layout->addLayout(layout_views);
 
     _code_view = new CodeView;
+    _code_view->setLabels(_labels);
     layout->addWidget(_code_view);
 
 
@@ -183,12 +184,24 @@ void MainWindow::openDebugInformations(QFile &file) {
     if (!file.open(QIODevice::ReadOnly)) {
         return;
     }
-    QDataStream in(&file);
+    QTextStream in(&file);
     QString label;
     int position;
+
+    QString previous_label = "";
+    int index = 0;
     while (!in.atEnd()) {
         in >> label >> position;
+        if (label == "")
+            position = 0x10000;
+        for (; index < position && index < 0x10000; index++) {
+            _labels[index] = previous_label;
+        }
+        previous_label = label;
         qDebug()<<label<<" "<<position<<"\n";
+    }
+    for (; index < position && index < 0x10000; index++) {
+        _labels[index] = previous_label;
     }
 }
 
@@ -200,14 +213,17 @@ void MainWindow::open_file() {
     int extension_pos = file_name.lastIndexOf('.');
     QString debug_path = file_name.leftRef(extension_pos) + ".debug";
     QFile debug_file(debug_path);
-    qDebug()<<file_name<<" "<<debug_path<<"\n";
     if (debug_file.exists()) {
         auto reply = QMessageBox::question(this, "Fichier de débug", "Un fichier contenant des informations de débug à été détecté. Voulez vous l'utiliser?",
                                 QMessageBox::Yes|QMessageBox::No);
         if (reply == QMessageBox::Yes) {
             this->openDebugInformations(debug_file);
+        } else {
+            for (int i = 0; i < 0x10000; ++i)
+                _labels[i] = "";
         }
     }
+
     QFile file(file_name);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return;

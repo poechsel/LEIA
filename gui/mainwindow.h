@@ -53,7 +53,7 @@ private:
     int evaluateAndMem();
     void _simulateNextBreakpoint_worker();
 
-    QString labels[0x10000];
+    QString _labels[0x10000];
 
     QStringList _code;
     QListWidget *_list_view;

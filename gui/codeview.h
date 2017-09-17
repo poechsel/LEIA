@@ -15,10 +15,13 @@ public:
     void setMachine(Machine &machine);
     void update();
     void updateOptimize(QVector<int> indices);
+    void setLabels(QString *labels) {_labels = labels;}
 
 protected:
+    QString rowToString(int row);
     void refresh();
     Machine *_machine;
+    QString *_labels;
 
 public slots:
     void updateCode(int row);

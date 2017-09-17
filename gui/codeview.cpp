@@ -10,7 +10,7 @@ CodeView::CodeView(QWidget *parent):
 void CodeView::update() {
     QStringList code;
     for (int i = 0; i < 0x10000; ++i) {
-        code.append(QString("[") + QString::number(i) + QString("]") + QString::fromStdString(dissassemble(_machine->memory[i])));
+        code.append(rowToString(i));
     }
     this->clear();
     this->addItems(code);
@@ -19,11 +19,24 @@ void CodeView::update() {
     this->setCurrentRow(this->_machine->pc);
 }
 
+QString CodeView::rowToString(int row) {
+    if (0 <= row && row < 0x10000) {
+        QString dis = QString::fromStdString(dissassemble(_machine->memory[row]));
+        uword operation = _machine->memory[row];
+        if ((operation >> 12) == 0b1010) {
+            int index = (operation & 0b111111111111) * 16;
+            if (_labels[index] != "") {
+                dis = "call " + _labels[index];
+            }
+        }
+        return QString("[") + QString::number(row) + QString("]") + _labels[row] + ": " + dis;
+    }
+}
+
 void CodeView::updateOptimize(QVector<int> indices) {
     if (this->_machine) {
         for (int t : indices) {
-            QString txt = QString("[") + QString::number(t) + QString("]") + QString::fromStdString(dissassemble(_machine->memory[t]));
-            this->item(t)->setText(txt);
+            this->item(t)->setText(rowToString(t));
         }
         this->setCurrentRow(this->_machine->pc);
     }
@@ -31,9 +44,8 @@ void CodeView::updateOptimize(QVector<int> indices) {
 
 void CodeView::updateCode(int row) {
     if (!_machine) return;
-    QString foo = QString::fromStdString(dissassemble(_machine->memory[row]));
     if (row < this->count())
-        this->item(row)->setText(QString("[") + QString::number(row) + QString("]") + foo);
+        this->item(row)->setText(rowToString(row));
 }
 
 void CodeView::setMachine(Machine &machine) {
