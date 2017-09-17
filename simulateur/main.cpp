@@ -11,7 +11,7 @@
 
 #include "structs.h"
 #include "debug.h"
-#include "screen.h"
+#include "sdlscreen.h"
 #include "simulateur.h"
 #include "utilities.h"
 

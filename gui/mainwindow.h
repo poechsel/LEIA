@@ -10,7 +10,6 @@
 #include "codeview.h"
 #include "../simulateur/utilities.h"
 #include "../simulateur/debug.h"
-#include "memoryview.h"
 #include "qtscreen.h"
 #include "../simulateur/simulateur.h"
 #include <QtConcurrent/QtConcurrent>
@@ -18,6 +17,8 @@
 #include <QPushButton>
 #include "dataview.h"
 #include "registersview.h"
+#include <QDir>
+#include <QMessageBox>
 
 namespace Ui {
 class MainWindow;
@@ -33,6 +34,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void simulate(Param &param, Machine &machine);
+    void openDebugInformations(QFile &file);
 
 public slots:
     void simulateSingleStep();
@@ -49,8 +51,9 @@ signals:
 
 private:
     int evaluateAndMem();
-void _simulateNextBreakpoint_worker();
+    void _simulateNextBreakpoint_worker();
 
+    QString labels[0x10000];
 
     QStringList _code;
     QListWidget *_list_view;

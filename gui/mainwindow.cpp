@@ -178,11 +178,36 @@ int MainWindow::evaluateAndMem() {
     return -1;
 }
 
+
+void MainWindow::openDebugInformations(QFile &file) {
+    if (!file.open(QIODevice::ReadOnly)) {
+        return;
+    }
+    QDataStream in(&file);
+    QString label;
+    int position;
+    while (!in.atEnd()) {
+        in >> label >> position;
+        qDebug()<<label<<" "<<position<<"\n";
+    }
+}
+
 void MainWindow::open_file() {
     disconnect(_memory_view, SIGNAL(cellChanged(int,int)), _memory_view, SLOT(editCell(int,int)));
     QString file_name = QFileDialog::getOpenFileName(this,
-    tr("Open code"), "/home/pierre/Demo-ASR/demo/", "");
+    tr("Open code"), "/home/pierre/LEIA/", "");
 
+    int extension_pos = file_name.lastIndexOf('.');
+    QString debug_path = file_name.leftRef(extension_pos) + ".debug";
+    QFile debug_file(debug_path);
+    qDebug()<<file_name<<" "<<debug_path<<"\n";
+    if (debug_file.exists()) {
+        auto reply = QMessageBox::question(this, "Fichier de débug", "Un fichier contenant des informations de débug à été détecté. Voulez vous l'utiliser?",
+                                QMessageBox::Yes|QMessageBox::No);
+        if (reply == QMessageBox::Yes) {
+            this->openDebugInformations(debug_file);
+        }
+    }
     QFile file(file_name);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return;
