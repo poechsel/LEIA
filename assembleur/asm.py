@@ -1,5 +1,7 @@
 import sys, inspect
 from functools import reduce
+import os.path
+import argparse
 
 
 class _Erreur:
@@ -640,10 +642,10 @@ def load_file(file_path):
 
 
 
-
 def first_pass(path, f, env):
     #in the first pass we compute the label offsets, add the instruction to the set and load included files
-    env.already_loaded[path] = True;
+    dir_path = os.path.dirname(path)
+    env.already_loaded[os.path.abspath(path)] = True;
     for l, line in f:
         if line[0][-1] == ":":
             if line[0] in env.labels:
@@ -654,8 +656,9 @@ def first_pass(path, f, env):
             env.instr += [env.instr_set[line[0]](line, path, l+1,  env.line)]
             env.line += env.instr[-1].jump_line
         elif line[0] == "#include":
-            if line[1] not in env.already_loaded:
-                first_pass(line[1], load_file(line[1]), env)
+            abs_path_loaded = os.path.abspath(os.path.join(dir_path, line[1]))
+            if abs_path_loaded not in env.already_loaded:
+                first_pass(abs_path_loaded, load_file(abs_path_loaded), env)
         else:
             if line[0][0] != ';':
                 print("[Error], Undefined instruction (ligne {}) in file {}: {}".format(l+1, path, line))
@@ -670,24 +673,33 @@ def second_pass(env):
 
 if __name__ == '__main__':
     stack_direction = 0
-    path = ""
+    parser = argparse.ArgumentParser(description='Assemble a LEIA asm file')
+    parser.add_argument("path", help = "path of the file to assemble")
+    parser.add_argument("-r", "--reverse_stack", action="store_true", help  = "reverse the direction in which the stack grows")
+    parser.add_argument("-o", "--out", help = "select output file")
+    args = parser.parse_args()
+    """
     for i in sys.argv[1:]:
         if i == "--reverse_stack":
             stack_direction = 1
         else :
             path = i
-    if path != "":
-        f = load_file(path)
+    """
+    if args.path != "":
+        f = load_file(os.path.abspath(args.path))
         if f is None:
             print("Input file wasn't able to be loaded")
         env = _Environment()
-        env.reverse_stack = stack_direction
-        first_pass(path, f, env)
+        env.reverse_stack = args.reverse_stack
+        first_pass(args.path, f, env)
         code = second_pass(env)
         if code is None:
             print("No code was generated")
         else:
-            out_path = path.split(".")[0] + ".obj"
+            out_path = args.out
+            if out_path is None:
+                file_name, _ = os.path.splitext(os.path.basename(args.path))
+                out_path = file_name + ".obj"
             with open(out_path, "w") as out:
                 for c in code:
                     out.write(str(hex(c))[2:].zfill(4) + "\n")
