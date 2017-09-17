@@ -1,16 +1,16 @@
-#include "memoryview.h"
+#include "dataview.h"
 
-MemoryView::MemoryView(QWidget *parent):
-    QTableWidget(parent)
+DataView::DataView(int size, QString label_formatting, QWidget *parent):
+    QTableWidget(parent), _data(0), _size(size)
 {
-    this->setRowCount(0x10000);
+    this->setRowCount(_size);
     this->setColumnCount(3);
 
     QAbstractItemModel* model = this->model();
             QStringList labels;
     for (int i = 0; i < this->rowCount(); ++i) {
         QVariant data = model->headerData(i, Qt::Vertical);
-        labels << QString("%1").arg(data.toInt() - 1);
+        labels << QString(label_formatting).arg(data.toInt() - 1);
         for (int j = 0; j < this->columnCount(); ++j) {
             this->setItem(i, j, new QTableWidgetItem(""));
         }
@@ -22,11 +22,11 @@ MemoryView::MemoryView(QWidget *parent):
     this->setHorizontalHeaderItem(2, new QTableWidgetItem(QString("Char")));
 }
 
-void MemoryView::setMachine(Machine &machine) {
-    this->_machine = &machine;
+void DataView::setData(uword *data) {
+    this->_data = data;
 }
 
-void MemoryView::_updateRow(int row, int value) {
+void DataView::_updateRow(int row, int value) {
     if (0 <= row && row < this->rowCount()) {
         this->item(row, 0)->setText(QString::number(value));
         this->item(row, 1)->setText("0x" + QString::number(value, 16).rightJustified(4, '0'));
@@ -34,22 +34,26 @@ void MemoryView::_updateRow(int row, int value) {
     }
 }
 
-void MemoryView::updateOptimize(QVector<int> indices) {
-    if (this->_machine) {
+void DataView::updateOptimize(QVector<int> indices) {
+    if (this->_data) {
         for (int t : indices) {
-            _updateRow(t, this->_machine->memory[t]);
+            _updateRow(t, this->_data[t]);
         }
     }
 }
 
-void MemoryView::update() {
-    for (int i = 0; i < 0x10000; ++i) {
-        this->_updateRow(i, _machine->memory[i]);
+void DataView::focusOn(int row) {
+    this->setCurrentCell(row, 0);
+}
+
+void DataView::update() {
+    for (int i = 0; i < this->rowCount(); ++i) {
+        this->_updateRow(i, _data[i]);
     }
     this->resizeColumnsToContents();
 }
 
-void MemoryView::editCell(int row, int column) {
+void DataView::editCell(int row, int column) {
     bool conversion = true;
     int v = 0;
     QString value = this->item(row, column)->text();
@@ -62,10 +66,10 @@ void MemoryView::editCell(int row, int column) {
             v = (int)value.at(0).toLatin1();
     }
     if (conversion) {
-        _machine->memory[row] = v;
+        _data[row] = v;
         emit memoryChanged(row);
     } else {
-        v = _machine->memory[row];
+        v = _data[row];
     }
     this->_updateRow(row, v);
 }

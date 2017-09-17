@@ -1,7 +1,7 @@
 #include "qtscreen.h"
 
 QtScreen::QtScreen(QWidget *parent) :
-    QWidget(parent), Screen()
+    QWidget(parent), Screen(), _last_time(0)
 
 {
     _pixels = new QRgb[WIDTH*HEIGHT];
@@ -44,5 +44,9 @@ void QtScreen::updateContent(uword *memory) {
         _pixels[i - MEM_SCREEN_BEGIN] = ((red << (2+16)) + (green << (3+8)) + (blue << 3)) | 0xff000000;
     }
     this->update();
+    int curr_time = _timer.msec();
+    if (curr_time - _last_time < (1000.f * 1.f/60.f))
+        QThread::msleep((1000.f * 1.f / 60.f) - _last_time + curr_time);
+   _last_time = curr_time;
 }
 

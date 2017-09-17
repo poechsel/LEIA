@@ -6,23 +6,23 @@
 #include <QTableWidget>
 #include <QMenu>
 #include "../simulateur/structs.h"
+#include "dataview.h"
 
-class RegistersView : public QTableWidget
+class RegistersView : public DataView
 {
     Q_OBJECT
 public:
     RegistersView(QWidget *parent = 0);
-    void update();
-    void updateOptimize(QVector<int> indices);
-    void setMachine(Machine &machine);
-
 
 public slots:
-    void editCell(int row, int column);
 void showContextMenu(const QPoint &pos);
+private slots:
+void switchToMemorySelected();
+
+signals:
+    void sendSelected(int row);
 private:
-    Machine *_machine;
-    void _updateRow(int row, int value);
+    int _selected_row;
 };
 
 #endif // REGISTERSVIEW_H

@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QHBoxLayout *layout = new QHBoxLayout;
 
     QVBoxLayout *layout_views = new QVBoxLayout;
-    _memory_view = new MemoryView;
+    _memory_view = new DataView(0x10000);
     layout_views->addWidget(_memory_view);
     _registers_view = new RegistersView;
     layout_views->addWidget(_registers_view);
@@ -76,6 +76,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_button_play, SIGNAL(released()), this, SLOT(simulationStart()));
     connect(_button_stop, SIGNAL(released()), this, SLOT(simulationStop()));
     connect(this, SIGNAL(workingEnd()), this, SLOT(activateSimulateControls()));
+
+    connect(_registers_view, SIGNAL(sendSelected(int)), _memory_view, SLOT(focusOn(int)));
+
     activateSimulateControls();
 }
 
@@ -189,8 +192,8 @@ void MainWindow::open_file() {
     loadCodeToMemory(_machine);
 
     _code_view->setMachine(_machine);
-    _memory_view->setMachine(_machine);
-    _registers_view->setMachine(_machine);
+    _memory_view->setData(_machine.memory);
+    _registers_view->setData(_machine.registers);
     _code_view->update();
     _memory_view->update();
     _registers_view->update();

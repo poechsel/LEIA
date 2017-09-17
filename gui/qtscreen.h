@@ -6,6 +6,8 @@
 #include <SDL2/SDL.h>
 #include "../simulateur/screen.h"
 #include <QDebug>
+#include <QTime>
+#include <QThread>
 
 #include <QPainter>
 
@@ -21,6 +23,8 @@ public:
 private:
     QRgb* _pixels;
     QImage _image;
+    int _last_time;
+    QTime _timer;
 signals:
 
 public slots:

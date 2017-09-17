@@ -32,11 +32,11 @@ SOURCES += \
     ../simulateur/structs.cpp \
     ../simulateur/debug.cpp \
     codeview.cpp \
-    memoryview.cpp \
     ../simulateur/screen.cpp \
     ../simulateur/simulateur.cpp \
     qtscreen.cpp \
-    registersview.cpp
+    registersview.cpp \
+    dataview.cpp
 
 
 HEADERS += \
@@ -45,11 +45,11 @@ HEADERS += \
     ../simulateur/utilities.h \
     ../simulateur/debug.h \
     codeview.h \
-    memoryview.h \
     ../simulateur/screen.h \
     ../simulateur/simulateur.h \
     qtscreen.h \
-    registersview.h
+    registersview.h \
+    dataview.h
 
 FORMS += \
         mainwindow.ui

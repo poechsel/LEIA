@@ -16,6 +16,7 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QGroupBox>
 #include <QPushButton>
+#include "dataview.h"
 #include "registersview.h"
 
 namespace Ui {
@@ -54,7 +55,7 @@ void _simulateNextBreakpoint_worker();
     QStringList _code;
     QListWidget *_list_view;
     CodeView *_code_view;
-    MemoryView *_memory_view;
+    DataView *_memory_view;
     RegistersView *_registers_view;
     QtScreen *_screen_view;
 
