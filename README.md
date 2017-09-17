@@ -1,5 +1,5 @@
 # LEIA
-LEIA is a virtual asm created for some CS course. This project contain an assembly program, a simulator, and some basics assembly functions
+LEIA is a virtual asm created for some CS course. This project contain an assembly program, a simulator, and some basics assembly functions. A debugging GUI was recently added.
 
 
 
@@ -19,7 +19,15 @@ Authors : Pierre Oechsel and Guillaume Duboc, ENSL.
 
 ## ASSEMBLY
 - python3 asm.py /path/to/example.s produces /path/to/example.obj
+    - the assembly program contains several options:
+        - -h to view the help
+        - -o OUT to specify the output
+        - -d to generate a file containing debugging informations
+        - --reverse_stack to reverse the stack direction
 - then ./LEIA {-f,-s,-q} /path/to/example.obj
+
+## GUI
+- The graphical debugger can be compiled with Qt-5.9
 
 ## TEST DISTRIB
 cd EX 

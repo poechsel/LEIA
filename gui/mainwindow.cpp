@@ -5,7 +5,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-
+    this->setWindowTitle("LEIA debugger");
 
     QMenu *menuFichier = menuBar()->addMenu("&Fichier");
     QAction *action_open_file = new QAction(tr("&Open"), this);
