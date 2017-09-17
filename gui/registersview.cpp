@@ -12,14 +12,10 @@ RegistersView::RegistersView(QWidget *parent):
 void RegistersView::showContextMenu(const QPoint &pos)
 {
    QMenu contextMenu(tr("Context menu"), this);
-
    QAction action1("Accèder à cette zone mémoire", this);
    connect(&action1, SIGNAL(triggered()), this, SLOT(switchToMemorySelected()));
    _selected_row = this->itemAt(pos)->row();
    contextMenu.addAction(&action1);
-
-
-
    contextMenu.exec(mapToGlobal(pos));
 }
 

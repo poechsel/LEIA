@@ -6,6 +6,7 @@
 #include <QListWidget>
 #include "../simulateur/structs.h"
 #include "../simulateur/debug.h"
+#include <QMenu>
 
 class CodeView: public QListWidget
 {
@@ -25,6 +26,9 @@ protected:
 
 public slots:
     void updateCode(int row);
+    void showContextMenu(const QPoint &);
+    void setPositionToCurrent();
+    void setPositionToNext();
 };
 
 #endif // CODEVIEW_H

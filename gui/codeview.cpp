@@ -4,8 +4,63 @@ CodeView::CodeView(QWidget *parent):
     QListWidget(parent), _machine(0)
 {
     this->setUniformItemSizes(true);
+
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+        this, SLOT(showContextMenu(const QPoint &)));
+}
+void CodeView::showContextMenu(const QPoint &pos)
+{
+   QMenu contextMenu(tr("Context menu"), this);
+   QAction action1("Voir l'instruction en cours d'execution", this);
+   QAction action2("Voir l'instruction suivante", this);
+   connect(&action1, SIGNAL(triggered()), this, SLOT(setPositionToCurrent()));
+   connect(&action2, SIGNAL(triggered()), this, SLOT(setPositionToNext()));
+   contextMenu.addAction(&action1);
+   if (this->_machine) {
+        int index = this->currentRow();
+        if (0 <= index && index < 0x10000) {
+            uword opcode = this->_machine->memory[index];
+            int next_index = index + 1;
+            if ((opcode >> 12) == 0b0011 || (opcode == 0xb001)) {
+            } else {
+                contextMenu.addAction(&action2);
+            }
+        }
+   }
+   contextMenu.exec(mapToGlobal(pos));
 }
 
+void CodeView::setPositionToCurrent() {
+    if (this->_machine) {
+        this->setCurrentRow(this->_machine->pc);
+    }
+}
+
+void CodeView::setPositionToNext() {
+    if (this->_machine) {
+        int index = this->currentRow();
+        if (0 <= index && index < 0x10000) {
+            uword opcode = this->_machine->memory[index];
+            int next_index = index + 1;
+            if ((opcode >> 12) == 0b1010) {
+                next_index = (opcode & 0xfff) * 16;
+            } else if ((opcode >> 12) == 0b1011) {
+                word second_part = (opcode & 0xfff);
+                if (second_part == 1) {
+                    next_index = _machine->registers[15];
+                } else {
+                    next_index = index + second_part;
+                }
+            } else if ((opcode >> 12) == 0b0011) {
+                next_index = index;
+            }
+
+            if (0 <= index && index < 0x10000)
+                this->setCurrentRow(next_index);
+        }
+    }
+}
 
 void CodeView::update() {
     QStringList code;
