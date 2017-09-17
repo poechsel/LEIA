@@ -1,5 +1,7 @@
 import sys, inspect
 from functools import reduce
+import os.path
+import argparse
 
 
 class _Erreur:
@@ -338,7 +340,8 @@ class CustomPush(_Instruction):
         self.jump_line = 2
     
     def parse(self, env):
-        return Wmem(["wmem", self.words[1], "[r7]"], "", "", "").parse(env) + Add(["sub", "r7", "r7", "1"], "", "", "").parse(env)
+        op = "add" if env.reverse_stack else "sub"
+        return Wmem(["wmem", self.words[1], "[r7]"], "", "", "").parse(env) + Add([op, "r7", "r7", "1"], "", "", "").parse(env)
 
 class CustomPop(_Instruction):
     def __init__(self, *args):
@@ -347,7 +350,8 @@ class CustomPop(_Instruction):
         self.jump_line = 2
     
     def parse(self, env):
-        return Sub(["add", "r7", "r7", "1"], "", "", "").parse(env) + Rmem(["rmem", self.words[1], "[r7]"], "", "", "").parse(env)
+        op = "sub" if env.reverse_stack else "add"
+        return Sub([op, "r7", "r7", "1"], "", "", "").parse(env) + Rmem(["rmem", self.words[1], "[r7]"], "", "", "").parse(env)
 
 
 class Letl(_Instruction):
@@ -501,6 +505,7 @@ class Call(_Instruction):
         if isinstance(temp, list):
             try:
                 temp = env.labels[self.words[1]]
+                env.called_labels.append(self.words[1])
             except:
                 return [[_Erreur(self, "Label", "not defined")]]
         return [self.addThing(0b1010, 12) + self.addThing(temp >> 4, 0)]
@@ -576,9 +581,11 @@ class _Environment:
     def __init__(self):
         self.line = 0
         self.labels = {}
+        self.called_labels = []
         self.instr = []
         self.instr_set = {}
         self.already_loaded = {}
+        self.reverse_stack = False
         #a small introspection trick. We get all the instruction on the fly. 
         #If the name begins with _ we don't add it. Then, the name of the 
         #instructions correspond to the name of the class lowered and when 
@@ -599,29 +606,6 @@ def load_file(file_path):
         #then put a space between comments to avoid problems
         #then split it to get the words
         PATTERN = re.compile(r'''((?:[^\s"']|"[^"]*"|'[^']*')+)''')
-        """ o = []
-        for l, line in enumerate(file):
-            if line.strip() != '':
-                lined = line.strip().lower().replace(";", " ;").split()
-                line_out = []
-                print(lined)
-                temp = ""
-                for e in lined:
-                    print(e)
-                    if e[0] == "\"":
-                        temp += e
-                    if temp != "":
-                        temp += " " + e
-                    else:
-                        line_out += e
-                    if e[-1] == "\"":
-                        line_out += [temp]
-                        temp = ""
-                if temp != "":
-                    line_out += [temp]
-                o += [(l, line_out)]
-        return o
-        """
         o = []
         for l, line in enumerate(file):
             nl = PATTERN.split(line.strip().replace(";", " ;"))[1::2]
@@ -637,10 +621,10 @@ def load_file(file_path):
 
 
 
-
 def first_pass(path, f, env):
     #in the first pass we compute the label offsets, add the instruction to the set and load included files
-    env.already_loaded[path] = True;
+    dir_path = os.path.dirname(path)
+    env.already_loaded[os.path.abspath(path)] = True;
     for l, line in f:
         if line[0][-1] == ":":
             if line[0] in env.labels:
@@ -651,8 +635,9 @@ def first_pass(path, f, env):
             env.instr += [env.instr_set[line[0]](line, path, l+1,  env.line)]
             env.line += env.instr[-1].jump_line
         elif line[0] == "#include":
-            if line[1] not in env.already_loaded:
-                first_pass(line[1], load_file(line[1]), env)
+            abs_path_loaded = os.path.abspath(os.path.join(dir_path, line[1]))
+            if abs_path_loaded not in env.already_loaded:
+                first_pass(abs_path_loaded, load_file(abs_path_loaded), env)
         else:
             if line[0][0] != ';':
                 print("[Error], Undefined instruction (ligne {}) in file {}: {}".format(l+1, path, line))
@@ -665,22 +650,53 @@ def second_pass(env):
     instr = [l.getOpcodes(env) for l in env.instr]
     return None if None in instr else [j for i in instr for j in i]
 
+def write_debug_file (env, path):
+    f, _ = os.path.splitext(path)
+    debug_file = f + ".debug"
+    labels = []
+    seen = {}
+    """
+    for l in env.called_labels :
+        if not l in seen :
+            labels.append((l, env.labels[l]))
+            seen[l] = True
+    """
+    labels = [(k, env.labels[k]) for k in env.labels]
+    labels.sort(key = lambda x : x[1])
+    with open(debug_file, "w") as out:
+        for l, i in labels:
+            out.write(l + " " + str(i) + "\n")
+
 if __name__ == '__main__':
-    if len(sys.argv) >= 2:
-        path = sys.argv[1]
-        f = load_file(path)
+    stack_direction = 0
+    parser = argparse.ArgumentParser(description='Assemble a LEIA asm file')
+    parser.add_argument("path", help = "path of the file to assemble")
+    parser.add_argument("-r", "--reverse_stack", action="store_true", help  = "reverse the direction in which the stack grows")
+    parser.add_argument("-o", "--out", help = "select output file")
+    parser.add_argument("-d", "--debug", action = "store_true", help = "write a debuging file")
+    args = parser.parse_args()
+
+    if args.path != "":
+        f = load_file(os.path.abspath(args.path))
         if f is None:
             print("Input file wasn't able to be loaded")
         env = _Environment()
-        first_pass(path, f, env)
+        env.reverse_stack = args.reverse_stack
+        first_pass(args.path, f, env)
         code = second_pass(env)
         if code is None:
             print("No code was generated")
         else:
-            out_path = path.split(".")[0] + ".obj"
+            out_path = args.out
+            if out_path is None:
+                file_name, _ = os.path.splitext(os.path.basename(args.path))
+                out_path = file_name + ".obj"
             with open(out_path, "w") as out:
                 for c in code:
                     out.write(str(hex(c))[2:].zfill(4) + "\n")
+            if args.debug:
+                write_debug_file(env, out_path)
+
     else:
-        print("please input a file")
+        print("Please input a file")
              

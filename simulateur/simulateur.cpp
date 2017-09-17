@@ -1,7 +1,8 @@
 #include "simulateur.h"
 
-void evaluate(const uword opcode, Machine &machine, Param &param) {
+void evaluate(const uword opcode, Machine &machine, Param &param, Screen* screen) {
     unsigned int speed_factor = 1;
+    //std::cout<<"azr\n";
 	switch (opcode>>12) {
 		case 0b0000: //wmem
 			if (opcode & 0b0000100000000000) { //push, obsolete
@@ -148,9 +149,12 @@ void evaluate(const uword opcode, Machine &machine, Param &param) {
 				printf("%c", opcode & 0xff);
 				break;
 			default:
-				refresh = true;
+				/*refresh = true;
 				while (refresh) {};
-			};
+			    */
+                if (screen)
+                    screen->updateContent(machine.memory);
+                };
 			machine.pc++;
 			break;
 		case 0b1111: //rmem
@@ -176,7 +180,7 @@ void evaluate(const uword opcode, Machine &machine, Param &param) {
 }
 
 
-void simulate(Machine &machine, Param &param) {
+void simulate(Machine &machine, Param &param, Screen *screen) {
 	machine.pc = 0;
 	uword previous_pc = -1;
 	while (machine.pc != previous_pc) {
@@ -186,12 +190,12 @@ void simulate(Machine &machine, Param &param) {
 			getchar();
 		previous_pc = machine.pc;
 		do {
-			evaluate(machine.memory[machine.pc], machine, param);
+			evaluate(machine.memory[machine.pc], machine, param, screen);
 		} while (param.skip_call && machine.in_call);
 	}
 }
 
-void fullDebug(Machine &machine, Param &param) {
+void fullDebug(Machine &machine, Param &param, Screen *screen) {
     std::ios::fmtflags cin_flags( std::cin.flags() );
 	machine.pc = 0;
 	uword previous_pc = -1;
@@ -219,12 +223,12 @@ void fullDebug(Machine &machine, Param &param) {
 				} else if (command.command == "n") {
 					param.skip_call = true;
 					while (machine.pc >= 0 && param.skip_call) {
-						evaluate(machine.memory[machine.pc], machine, param);
+						evaluate(machine.memory[machine.pc], machine, param, screen);
 						if (!machine.in_call)
 							param.skip_call = false;
 					}
 				} else if (command.command == "s") {
-					evaluate(machine.memory[machine.pc], machine, param);
+					evaluate(machine.memory[machine.pc], machine, param, screen);
 				} else if (command.command == "x") {
                     int address;
                     std::cin.unsetf(std::ios::dec);

@@ -9,9 +9,13 @@ all : $(EXEC)
 $(EXEC) : $(OBJS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
-main.o: main.cpp debug.h screen.h simulateur.h structs.h
+main.o: main.cpp debug.h screen.h simulateur.h structs.h utilities.h sdlscreen.h
+	$(CXX) $(CFLAGS) -o $@ -c $<
+utilities.o : utilities.cpp structs.h utilities.h
 	$(CXX) $(CFLAGS) -o $@ -c $<
 debug.o: debug.cpp structs.h debug.h
+	$(CXX) $(CFLAGS) -o $@ -c $<
+sdlscreen.o: sdlscreen.cpp structs.h sdlscreen.h screen.h
 	$(CXX) $(CFLAGS) -o $@ -c $<
 screen.o: screen.cpp structs.h screen.h
 	$(CXX) $(CFLAGS) -o $@ -c $<
