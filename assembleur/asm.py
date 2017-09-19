@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys, inspect
 from functools import reduce
 import os.path
