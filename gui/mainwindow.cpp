@@ -221,7 +221,7 @@ void MainWindow::open_file() {
     tr("Open code"), _last_path, "");
 
     int extension_pos = file_name.lastIndexOf('.');
-    QString debug_path = file_name.leftRef(extension_pos) + ".debug";
+    QString debug_path = file_name.left(extension_pos) + ".debug";
     QFile debug_file(debug_path);
     if (debug_file.exists()) {
         auto reply = QMessageBox::question(this, "Fichier de débug", "Un fichier contenant des informations de débug à été détecté. Voulez vous l'utiliser?",
