@@ -28,6 +28,7 @@ Authors : Pierre Oechsel and Guillaume Duboc, ENSL.
 
 ## GUI
 - The graphical debugger can be compiled with Qt-5.9
+- More informations inside the directory `gui/`
 
 ## TEST DISTRIB
 cd EX 
