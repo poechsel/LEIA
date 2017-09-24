@@ -1,0 +1,6 @@
+.qmake.stash
+Makefile
+ui_mainwindow.h
+gui
+moc_*.cpp
+
