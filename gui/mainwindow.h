@@ -53,6 +53,8 @@ public slots:
     void activateSimulateControls();
     void deactivateSimulateControls();
 
+    void threadSimulationStops();
+
 signals:
     void workingEnd();
     void consoleUpdate(QString text);
@@ -69,7 +71,7 @@ private:
     MemoryView *_memory_view;
     RegistersView *_registers_view;
     QtScreen *_screen_view;
-
+    QVector<int> _updated_indices;
 
 
         QPushButton* _button_single_step;
@@ -88,7 +90,7 @@ private:
     QString _last_path;
 
     QTextEdit *_console;
-
+    QFutureWatcher<void> *_future_watcher;
 private slots:
    void open_file();
 };

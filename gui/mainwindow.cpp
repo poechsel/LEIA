@@ -67,7 +67,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _screen_view->resize(120, 340);
 
+    _future_watcher = new QFutureWatcher<void>;
 
+    qRegisterMetaType<QVector<int>>("QVector<int>");
+
+    qRegisterMetaType<QItemSelection>("QItemSelection");
     setCentralWidget(layout);
 
     connect(_memory_view, SIGNAL(cellChanged(int,int)), _memory_view, SLOT(editCell(int,int)));
@@ -86,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_memory_view, SIGNAL(switchToCode(int)), _code_view, SLOT(setPosition(int)));
 
     connect(this, SIGNAL(consoleUpdate(QString)), _console, SLOT(insertPlainText(QString)));
-
+    connect(_future_watcher, SIGNAL(finished()), this, SLOT(threadSimulationStops()));
     activateSimulateControls();
 }
 
@@ -121,8 +125,8 @@ void MainWindow::simulateNextBreakpoint() {
     this->deactivateSimulateControls();
     this->_use_breakpoints = true;
     this->_stop_simulation = false;
-    QtConcurrent::run(this, &MainWindow::_simulateNextBreakpoint_worker);
-
+    QFuture<void> future = QtConcurrent::run(this, &MainWindow::_simulateNextBreakpoint_worker);
+    _future_watcher->setFuture(future);
 }
 
 void MainWindow::deactivateSimulateControls() {
@@ -154,12 +158,20 @@ void MainWindow::_simulateNextBreakpoint_worker() {
             indices_cache[w] = true;
         }
     } while (!(
-             (this->_use_breakpoints && this->_code_view->isBreakpoint(_machine.pc)/*&& this->_code_view->item(_machine.pc)->checkState() == Qt::Checked*/)
+             (this->_use_breakpoints && this->_code_view->isBreakpoint(_machine.pc))
          || previous_pc == _machine.pc
          || this->_stop_simulation
              ));
-    _code_view->updateOptimize(indices);
+    /*_code_view->updateOptimize(indices);
     _memory_view->updateOptimize(indices);
+    _registers_view->update();
+    this->activateSimulateControls();*/
+    _updated_indices = indices;
+}
+
+void MainWindow::threadSimulationStops() {
+    _code_view->updateOptimize(_updated_indices);
+    _memory_view->updateOptimize(_updated_indices);
     _registers_view->update();
     this->activateSimulateControls();
 }
@@ -169,8 +181,8 @@ void MainWindow::simulationStart() {
     this->deactivateSimulateControls();
     this->_use_breakpoints = false;
     this->_stop_simulation = false;
-    QtConcurrent::run(this, &MainWindow::_simulateNextBreakpoint_worker);
-
+    QFuture<void> future = QtConcurrent::run(this, &MainWindow::_simulateNextBreakpoint_worker);
+    _future_watcher->setFuture(future);
 }
 
 void MainWindow::simulationStop() {
@@ -181,8 +193,8 @@ int MainWindow::evaluateAndMem() {
     auto opcode = _machine.memory[_machine.pc];
     std::string out = evaluate(_machine.memory[_machine.pc], _machine, _param, (Screen*) _screen_view);
     QString out_q = QString::fromStdString(out);
-    if (out_q != "")
-        emit consoleUpdate(out_q);
+   if (out_q != "")
+        this->_console->insertPlainText(out_q);
     if ((opcode >> 12) == 0b0000) {
        return _machine.registers[toUWord(opcode)];
     }

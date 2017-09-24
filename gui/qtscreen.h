@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QWidget>
-#include <SDL2/SDL.h>
 #include "../simulateur/screen.h"
 #include <QDebug>
 #include <QTime>

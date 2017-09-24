@@ -21,7 +21,6 @@ QtScreen::~QtScreen() {
 
 void QtScreen::paintEvent(QPaintEvent*) {
     QPainter painter(this);
-    qDebug()<<"paint event\n";
     QImage image = QImage((uchar*)_pixels, WIDTH, HEIGHT, QImage::Format_ARGB32);
 
     QRectF rectangle;
@@ -35,7 +34,6 @@ void QtScreen::paintEvent(QPaintEvent*) {
 }
 
 void QtScreen::updateContent(uword *memory) {
-    qDebug()<<"drawing\n";
     for (unsigned int i = MEM_SCREEN_BEGIN; i <= 0xFFFF; ++i) {
         word pixel = (memory) ? memory[i] : 0;
         uint32_t blue = pixel & ((1<<5)-1);
