@@ -1,4 +1,4 @@
-CFLAGS = -Wall -O2 -std=c++11
+CFLAGS = -Wall -O2 -std=c++11 -Wextra -Werror
 LDFLAGS = -lSDL2 -lpthread -lstdc++
 EXEC = LEIA
 SRC = $(wildcard *.cpp)

@@ -34,7 +34,6 @@ void CodeView::showContextMenu(const QPoint &pos)
         int index = this->currentRow();
         if (0 <= index && index < 0x10000) {
             uword opcode = this->_machine->memory[index];
-            int next_index = index + 1;
             if ((opcode >> 12) == 0b0011 || (opcode == 0xb001)) {
             } else {
                 contextMenu.addAction(&action2);
@@ -114,6 +113,7 @@ QString CodeView::rowToString(int row) {
         this->item(row, 3)->setText(dis);
         return QString("[") + QString::number(row) + QString("]") + _labels[row] + ": " + dis;
     }
+    return "";
 }
 
 bool CodeView::isBreakpoint(int row) {

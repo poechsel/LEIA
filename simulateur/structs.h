@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 
 //constants about the environnement
 const int WIDTH = 160;

@@ -212,10 +212,7 @@ void fullDebug(Machine &machine, Param &param, Screen *screen) {
 		previous_pc = machine.pc;
 		correct_command = true;
 		for (uword i = machine.pc; i < machine.pc + 10; ++i) {
-			if (i >= 0)
 				std::cout<<i<<"("<<i<<")"<<":\t"<<dissassemble(machine.memory[i])<<"\n";
-			else
-				std::cout<<i<<"("<<i<<")"<<":\t\n";
 		}
 		std::string action;
 		std::cin>>action;
@@ -230,7 +227,7 @@ void fullDebug(Machine &machine, Param &param, Screen *screen) {
 					correct_command = false;
 				} else if (command.command == "n") {
 					param.skip_call = true;
-					while (machine.pc >= 0 && param.skip_call) {
+					while (param.skip_call) {
                         std::string out = evaluate(machine.memory[machine.pc], machine, param, screen);
                         if (out != "")
                             std::cout<<out;
