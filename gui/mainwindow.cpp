@@ -177,7 +177,6 @@ void MainWindow::threadSimulationStops() {
 }
 
 void MainWindow::simulationStart() {
-    qDebug()<<"starting\n";
     this->deactivateSimulateControls();
     this->_use_breakpoints = false;
     this->_stop_simulation = false;
@@ -220,7 +219,6 @@ void MainWindow::openDebugInformations(QFile &file) {
             _labels[index] = previous_label;
         }
         previous_label = label;
-        qDebug()<<label<<" "<<position<<"\n";
     }
     for (; index < position && index < 0x10000; index++) {
         _labels[index] = previous_label;
@@ -283,7 +281,6 @@ void MainWindow::simulate(Param &param, Machine &machine) {
         previous_pc = machine.pc;
             evaluate(machine.memory[machine.pc], machine, param, (Screen*) _screen_view);
     }
-    qDebug()<<"quit\n";
 }
 
 MainWindow::~MainWindow()

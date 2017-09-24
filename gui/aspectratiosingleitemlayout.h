@@ -90,13 +90,10 @@ public:
                 h = w / _aspect_ratio;
                 int y;
                 if (_item->alignment() & Qt::AlignTop) {
-                    qDebug()<<"yes1\n";
                     y = margin();
             } else if (_item->alignment() & Qt::AlignBottom) {
-                    qDebug()<<"yes2\n";
                     y = rect.height() - margin() - h;
                 } else {
-                    qDebug()<<"yes\n";
                     y = margin() + (availH - h) / 2;
                 }
                 wdg->setGeometry(rect.x() + margin(), rect.y() + y, w, h);
