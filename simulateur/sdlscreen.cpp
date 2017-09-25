@@ -5,14 +5,14 @@ SDLScreen::SDLScreen():
     _refresh(false),
 _force_quit(false)
 {
-    createsdl();
+    //createsdl();
     _thread = std::thread(&SDLScreen::action, this);
 }
 
 SDLScreen::~SDLScreen() {
     this->_force_quit = true;
     _thread.join();
-    closesdl();
+    //closesdl();
 }
 
 void SDLScreen::updateContent(uword *memory) {
@@ -42,6 +42,7 @@ void SDLScreen::closesdl() {
 }
     
 void SDLScreen::action() {
+    this->createsdl();
 	SDL_Event e;
 	Uint32 last_time = SDL_GetTicks();
 	SDL_RenderSetScale(_renderer, 2, 2);
@@ -80,6 +81,6 @@ void SDLScreen::action() {
 		}
 	}
 	_refresh = false;
-    closesdl();
+    this->closesdl();
 }
 
