@@ -57,7 +57,7 @@ void DataView::update() {
 }
 
 void DataView::editCell(int row, int column) {
-    bool conversion = true;
+    bool conversion = false;
     int v = 0;
     QString value = this->item(row, column)->text();
     if (column == 0) {
@@ -69,7 +69,7 @@ void DataView::editCell(int row, int column) {
             v = (int)value.at(0).toLatin1();
     }
     if (conversion) {
-        _data[row] = v;
+        //_data[row] = v;
         emit memoryChanged(row);
     } else {
         v = _data[row];
