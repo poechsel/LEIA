@@ -98,8 +98,16 @@ int main(int argc, char* argv[]) {
     {
         using namespace std;
         string dir = argv[0];
-        dir.resize(dir.rfind('/')); // dirname of argv[0], i.e. LEIA directory.
-        loadClockTicksRc(dir, ct);
+	int pos = dir.rfind('/');
+	if (pos != -1) {
+		dir.resize(pos); // dirname of argv[0],
+		                 // i.e. LEIA directory.
+		loadClockTicksRc(dir, ct);
+	} else {
+		// We couldn't find the .rc file. Use hardcoded default.
+		ct.click_constant = 0;
+		ct.add_t = 1;
+	}
     }
     Param param;
 	bool quiet = false;
