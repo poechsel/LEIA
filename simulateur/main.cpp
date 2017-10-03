@@ -86,7 +86,12 @@ void loadClockTicksRc(const std::string &dir, struct ClockTicks &ct) {
 
 int main(int argc, char* argv[]) {
 	if (argc != 3) {
-		printf("Syntax: %s {-s,-r,-fulldebug,-q} <file.obj>\n", argv[0]);
+		printf("Syntax: %s {-s,-r,-f, -fulldebug,-q} <file.obj>\n", argv[0]);
+		printf("-s: step by step\n"
+		       "-r: recursive\n"
+		       "-f: fast simulation\n"
+		       "-fulldebug: verbose++ mode\n"
+		       "-q: quiet mode, no gui\n");
 		return EXIT_FAILURE;
 	}
     ClockTicks ct = clockticks_new();
