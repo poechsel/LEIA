@@ -1,3 +1,5 @@
+#ifdef WITHSDL
+
 #include "sdlscreen.h"
 
 
@@ -84,3 +86,4 @@ void SDLScreen::action() {
     this->closesdl();
 }
 
+#endif

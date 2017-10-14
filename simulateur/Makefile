@@ -1,11 +1,19 @@
-CFLAGS = -Wall -O2 -std=c++11 -Wextra -Werror -g
-LDFLAGS = -lSDL2 -lpthread -lstdc++ 
+WITHSDL=1  # comment to avoid SDL dependence.
+
+ifdef WITHSDL
+      LDFLAGS = -lSDL2 -lpthread -lstdc++ -DWITHSDL
+      CFLAGS = -Wall -O2 -std=c++11 -Wextra -Werror -g -DWITHSDL
+else
+	LDFLAGS = -lstdc++ -lpthread
+	CFLAGS = -Wall -O2 -std=c++11 -Wextra -Werror -g
+endif
+
 EXEC = LEIA
 SRC = $(wildcard *.cpp)
 OBJS = $(SRC:.cpp=.o)
- 
+
 all : $(EXEC) 
- 
+
 $(EXEC) : $(OBJS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
