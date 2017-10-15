@@ -1,6 +1,8 @@
 #ifndef SDLSCREEN_H
 #define SDLSCREEN_H 
 
+#ifdef WITHSDL
+
 #include <SDL2/SDL.h>
 #include "screen.h"
 
@@ -25,4 +27,6 @@ class SDLScreen : public Screen {
         std::thread _thread;
 
 };
+
+#endif
 #endif /* SDLSCREEN_H */
