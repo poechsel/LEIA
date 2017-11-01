@@ -209,7 +209,7 @@ class Print(_Instruction):
             self.jump_line = 1
         self.args_nb = 1
     def parse(self, env):
-        if self.words[1][0] == 'r':
+        if self.words[1][0].lower() == 'r':
             return [self.addThing(0b1110, 12) + self.addThing(1, 10) + self.addThing(self.read_register(self.words[1]), 0)]
         else:
             o = []
@@ -613,7 +613,7 @@ def load_file(file_path):
             nl = PATTERN.split(line.strip().replace(";", " ;"))[1::2]
             if line.strip() != '':
                 nl[0] = nl[0].lower()
-                if len(nl) and nl[0] not in [".string", ".word"]:
+                if len(nl) and nl[0] not in [".string", ".word", "print"]:
                     for i in range(1, len(nl)):
                         nl[i] = nl[i].lower()
                 o.append((l, nl))

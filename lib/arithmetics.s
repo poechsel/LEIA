@@ -63,7 +63,7 @@ div:
 	return	
 	
 .align16
-;; Compute the a // b
+;; Compute the a // b ("s" for signed)
 ;; input:
 ;;		r0 <- a
 ;;		r1 <- b
